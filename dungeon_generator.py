@@ -86,6 +86,11 @@ class DungeonObj:
                 string += self.ascii[i][j]
             string += "\n"
         return string
+    
+    def reset_map(self):
+        self.ascii = [
+            [self.cells.empty for i in range(self.dungeon_size)] for j in range(self.dungeon_size)
+        ]
 
 
     def place_rooms(self):
@@ -212,8 +217,9 @@ class DungeonObj:
                     c1 = components[i].nodes[0].id
                     c2 = components[i].nodes[1].id
                 except AttributeError as error:
-                    print(components)
-                    print(open_edges)
+                    # print(components)
+                    # print(open_edges)
+                    self.final_edges = []
                     return
                 
                 if not len(new_components):
@@ -312,15 +318,19 @@ class DungeonObj:
         # try:
         self.place_rooms()
         self.calc_boruvka()
-        self.place_paths()
-        # except Exception as e:
-        #     print(e)
-        #     self.generate()
+        if self.final_edges != []:
+            self.place_paths()
+            return str(self)
+        else:
+            return None
+            
 
 def main():
-    dungeon = DungeonObj(6, 5, 32)
-    cur = dungeon.generate()
-    print(dungeon)
+    dungeon_ascii = None
+    while not dungeon_ascii:
+        dungeon = DungeonObj(8, 8, 32)
+        dungeon_ascii = dungeon.generate()
+    print(dungeon_ascii)
 
 if __name__ == "__main__":
     # random.seed(3)
