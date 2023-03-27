@@ -67,21 +67,19 @@ class DungeonObj:
                  dungeon_size) -> None:
         self.num_rooms = num_rooms
         self.max_room_size = max_room_size
-        self.dungeon_size = dungeon_size
+        self.dungeon_size = dungeon_size - (dungeon_size % 2)
         self.buffer = 1 # NOTE: buffer between rooms
         self.cells = Cells()
         self.rooms = []
         self.final_edges = []
         
         # fill new dungeon with blanks
-        self.ascii = [
-            [self.cells.empty for i in range(self.dungeon_size)] for j in range(self.dungeon_size)
-        ]
+        self.reset_map()
 
 
     def __str__(self):
         string = ""
-        for i in range(self.dungeon_size):
+        for i in range(int(self.dungeon_size/2)):
             for j in range(self.dungeon_size):
                 string += self.ascii[i][j]
             string += "\n"
@@ -89,7 +87,7 @@ class DungeonObj:
     
     def reset_map(self):
         self.ascii = [
-            [self.cells.empty for i in range(self.dungeon_size)] for j in range(self.dungeon_size)
+            [self.cells.empty for i in range(int(self.dungeon_size))] for j in range(int(self.dungeon_size/2))
         ]
 
 
@@ -105,17 +103,17 @@ class DungeonObj:
                 
                 # generate 4th quadrant corner
                 corner_x = random.randint(0, self.dungeon_size-2)
-                corner_y = random.randint(0, self.dungeon_size-2)
+                corner_y = random.randint(0, int(self.dungeon_size/2)-2)
                 
                 # check that this is a valid placement
                 valid = True
-                if (corner_y+size_y+self.buffer > self.dungeon_size) or (corner_x+size_x+self.buffer > self.dungeon_size):
+                if (corner_y+size_y+self.buffer >= int(self.dungeon_size/2)) or (corner_x+size_x+self.buffer >= self.dungeon_size):
                     valid = False
-                    continue
-                for j in range(corner_y-self.buffer, corner_y+size_y+self.buffer):
-                    for k in range(corner_x-self.buffer, corner_x+size_x+self.buffer):
-                        if self.ascii[j][k] != self.cells.empty:
-                            valid = False
+                if valid:
+                    for j in range(corner_y-self.buffer, corner_y+size_y+self.buffer):
+                        for k in range(corner_x-self.buffer, corner_x+size_x+self.buffer):
+                            if self.ascii[j][k] != self.cells.empty:
+                                valid = False
 
             # place room, add to list
             self.rooms.append(Room(corner_x, corner_y, size_x, size_y, i))
@@ -317,6 +315,7 @@ class DungeonObj:
     def generate(self):
         # try:
         self.place_rooms()
+        # return str(self)
         self.calc_boruvka()
         if self.final_edges != []:
             self.place_paths()
@@ -328,7 +327,7 @@ class DungeonObj:
 def main():
     dungeon_ascii = None
     while not dungeon_ascii:
-        dungeon = DungeonObj(8, 8, 32)
+        dungeon = DungeonObj(10, 8, 32)
         dungeon_ascii = dungeon.generate()
     print(dungeon_ascii)
 
