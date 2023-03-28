@@ -12,30 +12,36 @@ async def send_message(message, user_message, is_private):
 
 
 def run_discord_bot():
-    TOKEN = 'MTA4OTk4ODI5Mjc3NjMxNzAzOQ.GOfZII.JVgePYoKpxseERY94iEZYERG5vvC1yVcu1ojgc'
+    TOKEN = 'MTA4OTk4ODI5Mjc3NjMxNzAzOQ.GfG78G.ShS0F6FHKkiFRrnwryoFVhTeG_Dr8lqHrZFQGQ'
     intents = discord.Intents.default()
     intents.message_content = True
     client = discord.Client(intents=intents)
 
-    @client.event
-    async def on_ready():
-        print(f'{client.user} is now running!')
+@client.event
+async def on_ready():
+    print(f'{client.user} is now running!')
 
-    @client.event
-    async def on_message(message):
-        if message.author == client.user:
-            return
+@client.event
+async def on_message(message):
 
-        username = str(message.author)
-        user_message = str(message.content)
-        channel = str(message.channel)
+    generator_output()
 
-        print(f'{username} said: "{user_message}" ({channel})')
+    if message.author == client.user:
+        return
 
-        if user_message[0] == '?':
-            user_message = user_message[1:]
-            await send_message(message, user_message, is_private=True)
-        else:
-            await send_message(message, user_message, is_private=False)
+    if message.content.startswith('/map'):
+        await message.channel.send(~~return statement from dungeon gen here ~~)
 
-        client.run(TOKEN)
+    username = str(message.author)
+    user_message = str(message.content)
+    channel = str(message.channel)
+
+    print(f'{username} said: "{user_message}" ({channel})')
+
+    if user_message[0] == '?':
+        user_message = user_message[1:]
+        await send_message(message, user_message, is_private=True)
+    else:
+        await send_message(message, user_message, is_private=False)
+
+    client.run(TOKEN)
