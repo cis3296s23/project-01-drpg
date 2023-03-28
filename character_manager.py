@@ -19,7 +19,7 @@ class CharacterManager:
 
     def calc_damage_taken(self, damage):
         # if self.armor
-            # return (damage - (1 - (self.armor.protection/100))) # damage - armor damage reduction
+            # return (damage * (1 - (self.armor.protection/100))) # damage - armor damage reduction
         # else
         return damage
 
