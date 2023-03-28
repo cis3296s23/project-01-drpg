@@ -324,13 +324,13 @@ class DungeonObj:
             return None
             
 
-def main():
+def generator_output():
     dungeon_ascii = None
     while not dungeon_ascii:
         dungeon = DungeonObj(10, 8, 32)
         dungeon_ascii = dungeon.generate()
-    print(dungeon_ascii)
+    return dungeon_ascii
 
 if __name__ == "__main__":
     # random.seed(3)
-    main()
+    print(generator_output())
