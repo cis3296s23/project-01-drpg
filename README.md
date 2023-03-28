@@ -1,6 +1,5 @@
-# Project Name
-Put here a short paragraph describing your project. 
-Adding an screenshot or a mockup of your application in action would be nice.  
+# DungeonRPG
+Dungeon RPG is a Discord bot that allows players to engage in combat and have fun on the Discord platform using the Discord API Framework utilizing Python as the programming language 
 
 ![This is a screenshot.](images.png)
 # How to run
