@@ -4,8 +4,17 @@ import responses
 async def send_message(message, user_message, is_private):
     try:
         response = responses.get_response(user_message)
-        await message.author.send(response) if is_private else await message.channel.send(response)
+        if response[0] != None:
+            sent_message = await message.author.send(response[0]) if is_private else await message.channel.send(response[0])
+            if response[1] != None:
+                for emoji in response[1]:
+                    await sent_message.add_reaction(emoji)
+    except Exception as e:
+        print(e)
 
+async def add_reaction(message, emoji):
+    try:
+        pass
     except Exception as e:
         print(e)
 
