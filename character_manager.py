@@ -1,5 +1,3 @@
-import bot
-import responses
 # import gear_generation
 
 class CharacterManager:
@@ -19,12 +17,15 @@ class CharacterManager:
 
     def calc_damage_taken(self, damage):
         # if self.armor
-            # return (damage * (1 - (self.armor.protection/100))) # damage - armor damage reduction
+            # return (damage * (1 - (self.armor.protection/100)) * (1 - (self.end/100)))
         # else
-        return damage
+        return damage * (1 - self.end/100)
 
-    def modifyHP(self, damage):
-        self.hp -= self.calc_damage_taken(damage)   # reduce hp based on calc_damage_taken
+    def modifyHP(self, amount):
+        # if amount < 0
+            # self.hp += amount # future feature but will include just in case
+        # else
+        self.hp -= self.calc_damage_taken(amount)   # reduce hp based on calc_damage_taken
 
     def check_lvl_up(self):
         # to be decided
