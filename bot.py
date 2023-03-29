@@ -1,7 +1,7 @@
 import discord
 import responses
 
-async def send_message(message, user_message, is_private):
+async def send_message(message, user_message, client, is_private):
     try:
         response = responses.get_response(user_message)
         if response[0] != None:
@@ -9,12 +9,20 @@ async def send_message(message, user_message, is_private):
             if response[1] != None:
                 for emoji in response[1]:
                     await sent_message.add_reaction(emoji)
+                await check_reaction(client, sent_message)
     except Exception as e:
         print(e)
 
-async def add_reaction(message, emoji):
+async def check_reaction(client, sent_message):
+    # please not that this only handles the first reaction
     try:
-        pass
+         # Wait for a reaction to be added to the message
+        def check(reaction, user):
+            return (user != client.user and
+                    reaction.message.id == sent_message.id)
+        
+        reaction, user = await client.wait_for('reaction_add', check=check)
+        responses.handle_movement(reaction.emoji)
     except Exception as e:
         print(e)
 
@@ -42,10 +50,12 @@ def run_discord_bot():
 
         print(f'{username} said: "{user_message}" ({channel})')
 
+        # handle response
+        sent_message = None
         if user_message[0] == '?':
             user_message = user_message[1:]
-            await send_message(message, user_message, is_private=True)
+            sent_message = await send_message(message, user_message, client, is_private=True)
         else:
-            await send_message(message, user_message, is_private=False)
+            sent_message = await send_message(message, user_message, client, is_private=False)
 
     client.run(TOKEN)

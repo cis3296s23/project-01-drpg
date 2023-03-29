@@ -29,5 +29,5 @@ def get_response(message: str) -> str:
 
     # return 'I didn\'t understand what you wrote. Try typing "!help".'
 
-def add_reactions() -> None:
-    pass
+def handle_movement(emoji) -> None:
+    print("moving "+ emoji)
