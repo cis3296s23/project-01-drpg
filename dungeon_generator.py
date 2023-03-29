@@ -45,6 +45,7 @@ class Cells:
         self.floor = '█'
         self.chest = '▣'
         self.door = '◫'
+        self.player = '몇'
 
 class Room:
     def __init__(self, 
@@ -72,6 +73,7 @@ class DungeonObj:
         self.cells = Cells()
         self.rooms = []
         self.final_edges = []
+        self.player_start = None
         
         # fill new dungeon with blanks
         self.reset_map()
@@ -90,6 +92,11 @@ class DungeonObj:
             [self.cells.empty for i in range(int(self.dungeon_size))] for j in range(int(self.dungeon_size/2))
         ]
 
+    def get_start_pos(self):
+        for i in range(len(self.ascii)):
+            for j in range(len(self.ascii)):
+                if self.ascii[i][j] == self.cells.floor:
+                    self.player_start = (i, j)
 
     def place_rooms(self):
         pass
@@ -319,17 +326,61 @@ class DungeonObj:
         self.calc_boruvka()
         if self.final_edges != []:
             self.place_paths()
+            self.get_start_pos()
+            self.ascii[self.player_start[0]][self.player_start[1]] = self.cells.player
             return str(self)
         else:
             return None
+
+    def check_valid_move(self, p):
+        if (p[0] < 0 or 
+            p[1] < 0 or 
+            p[0] > len(self.ascii) or 
+            p[1] > len(self.ascii[0])):
+            return False
+        elif (self.ascii[p[0]][p[1]] == self.cells.empty):
+            return False
+        return True
+        
+    def move_player(self, dir):
+        # get player pos
+        player_pos = None
+        for i in range(len(self.ascii)):
+            for j in range(len(self.ascii)):
+                if self.ascii[i][j] == self.cells.player:
+                    player_pos = (i,j)
+        # check that to_pos is valid
+        up = (player_pos[0]-1, player_pos[1])
+        down = (player_pos[0]+1, player_pos[1])
+        left = (player_pos[0], player_pos[1]-1)
+        right = (player_pos[0], player_pos[1]+1)
+        
+        if dir == "up" and self.check_valid_move(up):
+            self.ascii[player_pos[0]][player_pos[1]] = self.cells.floor
+            self.ascii[up[0]][up[1]] = self.cells.player
+        elif dir == "down" and self.check_valid_move(down):
+            self.ascii[player_pos[0]][player_pos[1]] = self.cells.floor
+            self.ascii[down[0]][down[1]] = self.cells.player
+        elif dir == "left" and self.check_valid_move(left):
+            self.ascii[player_pos[0]][player_pos[1]] = self.cells.floor
+            self.ascii[left[0]][left[1]] = self.cells.player
+        elif dir == "right" and self.check_valid_move(right):
+            self.ascii[player_pos[0]][player_pos[1]] = self.cells.floor
+            self.ascii[right[0]][right[1]] = self.cells.player
+        # swap tiles
+
+    def get_current_map(self):
+        return str(self)
             
 
 def generator_output():
     dungeon_ascii = None
+    dungeon_obj = None
     while not dungeon_ascii:
-        dungeon = DungeonObj(10, 8, 32)
-        dungeon_ascii = dungeon.generate()
-    return dungeon_ascii
+        dungeon_obj = DungeonObj(10, 8, 32)
+        dungeon_ascii = dungeon_obj.generate()
+    return dungeon_obj
+
 
 if __name__ == "__main__":
     # random.seed(3)
