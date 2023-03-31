@@ -19,6 +19,10 @@
 	"grenade" : {
 	    "damage": 10,
 	        "speed":10
-    	}
+    	},
+	"crossbow" : {
+	    "damage": 6,
+		"speed":4
+	},
     }
 }
