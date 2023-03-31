@@ -1,0 +1,20 @@
+{
+    "weapons": {
+        "dagger": {
+            "damage": 1,
+		"speed": 10
+        },
+        "sword": {
+           	"damage": 4,
+		"speed": 7
+        },
+        "halberd": {
+            "damage": 7,
+		"speed": 4
+        },
+        "zweihander": {
+            "damage": 10,
+		"speed": 1
+        }
+    }
+}
