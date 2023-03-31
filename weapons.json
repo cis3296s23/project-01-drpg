@@ -16,5 +16,9 @@
             "damage": 10,
 		"speed": 1
         }
+	"grenade" : {
+	    "damage": 10,
+	        "speed":10
+    	}
     }
 }
