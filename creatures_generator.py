@@ -3,13 +3,18 @@ import json
 import random
 
 class Creature:
+
     def __init__(self, lvl):
-        self.character_manager = CharacterManager()
-        with open('creatures.json', 'r') as f:
+        with open('/Users/mikaya/Documents/GitHub/project-01-drpg/creatures.json', 'r') as f:
             data = json.load(f)
             creatures = random.choice(data['creatures'])
-            self.name = f"{creatures['adjective']} {creatures['noun']}"
+            self.name = f"{creatures}"
             self.symbol = creatures['symbol']
-            self.hp = creatures['hp'] * lvl
-            self.attack = creatures['attack'] * lvl
-            self.defense = creatures['defense'] * lvl
+            self.character_manager = CharacterManager(
+              str=creatures['str'] * lvl,
+              end=creatures['end'] * lvl,
+              dex=creatures['dex'] * lvl,
+              hp=creatures['hp'] * lvl,
+              xp=0,
+              lvl=lvl
+            )
