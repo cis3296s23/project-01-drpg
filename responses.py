@@ -1,7 +1,4 @@
 import random
-import dungeon_generator
-
-dungeon_obj = dungeon_generator.generator_output()
 
 def get_response(message: str) -> str:
     """
@@ -36,7 +33,7 @@ def get_response(message: str) -> str:
 
     # return 'I didn\'t understand what you wrote. Try typing "!help".'
 
-def handle_movement(emoji) -> None:
+def handle_movement(emoji, dungeon_obj) -> None:
     if emoji == '\U00002B06':
         dungeon_obj.move_player("up")
     elif emoji == '\U00002B07':

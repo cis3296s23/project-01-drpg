@@ -1,5 +1,6 @@
 import random
 import math
+import creatures_generator
 
 class Node:
     def __init__(self, x, y, id=None) -> None:
@@ -102,12 +103,20 @@ class DungeonObj:
         # fill new dungeon with blanks
         self.reset_map()
 
+        self.place_rooms()
+        # return str(self)
+        self.calc_boruvka()
+        if self.final_edges != []:
+            self.place_paths()
+            self.get_start_pos()
+            self.ascii[self.player_start[0]][self.player_start[1]] = self.cells.player
+
 
     def __str__(self):
         string = ""
         for i in range(int(self.dungeon_size/2)):
             for j in range(self.dungeon_size):
-                string += self.ascii[i][j]
+                string += str(self.ascii[i][j])
             string += "\n"
         return string
     
@@ -332,19 +341,6 @@ class DungeonObj:
                     print("n2: ({},{})".format(n2.x, n2.y))
                     print("cur: ({},{})".format(cur_x, cur_y))
 
-    def generate(self):
-        # try:
-        self.place_rooms()
-        # return str(self)
-        self.calc_boruvka()
-        if self.final_edges != []:
-            self.place_paths()
-            self.get_start_pos()
-            self.ascii[self.player_start[0]][self.player_start[1]] = self.cells.player
-            return str(self)
-        else:
-            return None
-
     def check_valid_move(self, p):
         if (p[0] < 0 or 
             p[1] < 0 or 
@@ -356,31 +352,52 @@ class DungeonObj:
         return True
         
     def move_player(self, dir):
+        print("move player called")
         # get player pos
         player_pos = None
         for i in range(len(self.ascii)):
             for j in range(len(self.ascii)):
                 if self.ascii[i][j] == self.cells.player:
                     player_pos = (i,j)
+        print(player_pos)
         # check that to_pos is valid
         up = (player_pos[0]-1, player_pos[1])
         down = (player_pos[0]+1, player_pos[1])
         left = (player_pos[0], player_pos[1]-1)
         right = (player_pos[0], player_pos[1]+1)
+        mov = None
         
         if dir == "up" and self.check_valid_move(up):
-            self.ascii[player_pos[0]][player_pos[1]] = self.cells.floor
-            self.ascii[up[0]][up[1]] = self.cells.player
+            mov = up
         elif dir == "down" and self.check_valid_move(down):
-            self.ascii[player_pos[0]][player_pos[1]] = self.cells.floor
-            self.ascii[down[0]][down[1]] = self.cells.player
+            mov = down
         elif dir == "left" and self.check_valid_move(left):
-            self.ascii[player_pos[0]][player_pos[1]] = self.cells.floor
-            self.ascii[left[0]][left[1]] = self.cells.player
+            mov = left
         elif dir == "right" and self.check_valid_move(right):
-            self.ascii[player_pos[0]][player_pos[1]] = self.cells.floor
-            self.ascii[right[0]][right[1]] = self.cells.player
+            mov = right
+        else:
+            print("invalid move")
+            # handle this somehow
+            pass
         # swap tiles
+        if mov:
+            self.ascii[player_pos[0]][player_pos[1]] = self.cells.floor
+            self.ascii[mov[0]][mov[1]] = self.cells.player
+        else:
+            print("INVALID MOVE ERROR")
+
+    def place_creatures(self, n, player_level):
+        # places n creatures on the map
+        for i in range(n):
+            new_creature = creatures_generator.Creature(player_level)
+            valid = False
+            while not valid:
+                x = random.randint(0, len(self.ascii)-1)
+                y = random.randint(0, len(self.ascii[0])-1)
+                if self.ascii[x][y] == self.cells.floor:
+                    self.ascii[x][y] = new_creature
+                    valid = True
+
 
     def get_current_map(self):
         return str(self)

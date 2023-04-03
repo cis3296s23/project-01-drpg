@@ -1,30 +1,26 @@
 import discord
 import responses
 
-async def send_message(message, user_message, client, is_private):
-    try:
-        response = responses.get_response(user_message)
-        if response[0] != None:
-            sent_message = await message.author.send(response[0]) if is_private else await message.channel.send(response[0])
-            if response[1] != None:
-                # add emojis
-                for emoji in response[1]:
-                    await sent_message.add_reaction(emoji)
-                # check reaction
-                new_map = None
-                while True:
-                    while not new_map:
-                        new_map = await check_reaction(client, sent_message)
-                    sent_message = await message.channel.send(new_map)
-                    for emoji in ['\U00002B06', '\U00002B07', '\U00002B05', '\U000027A1']:
-                        await sent_message.add_reaction(emoji)
-                    new_map = None
-    
-    except Exception as e:
-        print(e)
+def initialize_bot(player_obj, dungeon_obj):
+    global_dungeon = dungeon_obj
+    global_player = player_obj
+
+async def standard_dungeon(message, client):
+    # This is the standard dungeon loop
+    sent_message = await message.channel.send(str(global_dungeon))
+    for emoji in ['\U00002B06', '\U00002B07', '\U00002B05', '\U000027A1']:
+            await sent_message.add_reaction(emoji)
+    new_map = None
+    while True:
+        while not new_map:
+            new_map = await check_reaction(client, sent_message)
+        sent_message = await message.channel.send(new_map)
+        for emoji in ['\U00002B06', '\U00002B07', '\U00002B05', '\U000027A1']:
+            await sent_message.add_reaction(emoji)
+        new_map = None
 
 async def check_reaction(client, sent_message):
-    # please not that this only handles the first reaction
+    # please note that this only handles the first reaction
     try:
          # Wait for a reaction to be added to the message
         def check(reaction, user):
@@ -32,12 +28,38 @@ async def check_reaction(client, sent_message):
                     reaction.message.id == sent_message.id)
         
         reaction, user = await client.wait_for('reaction_add', check=check)
-        return responses.handle_movement(reaction.emoji)
+        return responses.handle_movement(reaction, global_dungeon)
+        # emoji = reaction
+        # if emoji == '\U00002B06':
+        #     global_dungeon.move_player("up")
+        # elif emoji == '\U00002B07':
+        #     global_dungeon.move_player("down")
+        # elif emoji == '\U00002B05':
+        #     global_dungeon.move_player("left")
+        # elif emoji == '\U000027A1':
+        #     global_dungeon.move_player("right")
+        # else:
+        #     pass
+        # print(global_dungeon.get_current_map())
+        
+        # return global_dungeon.get_current_map()
     except Exception as e:
         print(e)
 
+async def print_stats(client):
+    pass
+    # print the stats here, get them from the global object
 
-def run_discord_bot():
+def fight_enemy(player, creature):
+    # for now, we will just keep rolling stats until someone dies
+    pass
+
+
+def run_discord_bot(player_obj, dungeon_obj):
+    global global_dungeon
+    global global_player
+    global_dungeon = dungeon_obj
+    global_player = player_obj
     with open("TOKEN.txt", 'r') as tkn:
         TOKEN = tkn.read()
     intents = discord.Intents.default()
@@ -61,10 +83,9 @@ def run_discord_bot():
         print(f'{username} said: "{user_message}" ({channel})')
 
         # handle response
-        if user_message[0] == '?':
-            user_message = user_message[1:]
-            await send_message(message, user_message, client, is_private=True)
-        else:
-            await send_message(message, user_message, client, is_private=False)
+        if user_message == '!dungeon':
+            await standard_dungeon(message, client)
+        elif user_message == '!stat':
+            await print_stats(client)
 
     client.run(TOKEN)
