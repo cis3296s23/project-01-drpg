@@ -45,7 +45,7 @@ class Cells:
         self.floor = '█'
         self.chest = '▣'
         self.door = '◫'
-        self.player = '몇'
+        self.player = 'P'
 
 class Room:
     def __init__(self, 
