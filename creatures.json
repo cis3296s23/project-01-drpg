@@ -1,32 +1,36 @@
 {
-  "creatures": {
-    "goblin": {
+  "creatures": [
+    {
+      "name": "goblin",
       "str": 5,
       "end": 5,
-      "dex":5,
+      "dex": 5,
       "hp": 7,
       "symbol": "G"
     },
-    "skeleton": {
+    {
+      "name": "skeleton",
       "str": 4,
       "end": 3,
-      "dex":3,
+      "dex": 3,
       "hp": 4,
       "symbol": "S"
     },
-    "zombie": {
+    {
+      "name": "zombie", 
       "str": 4,
       "end": 7,
-      "dex":3,
+      "dex": 3,
       "hp": 10,
       "symbol": "Z"
     },
-    "dragon": {
+    {
+      "name": "dragon",
       "str": 10,
       "end": 10,
-      "dex":5,
+      "dex": 5,
       "hp": 15,
       "symbol": "D"
     }
-  }
+  ]
 }

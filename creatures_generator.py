@@ -5,10 +5,10 @@ import random
 class Creature:
 
     def __init__(self, lvl):
-        with open('/Users/mikaya/Documents/GitHub/project-01-drpg/creatures.json', 'r') as f:
+        with open('creatures.json', 'r') as f:
             data = json.load(f)
-            creatures = random.choice(data['creatures'])
-            self.name = f"{creatures}"
+            creatures = random.choice(data["creatures"])
+            self.name = creatures['name']
             self.symbol = creatures['symbol']
             self.character_manager = CharacterManager(
               str=creatures['str'] * lvl,
