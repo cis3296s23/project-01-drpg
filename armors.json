@@ -1,0 +1,16 @@
+{
+    "armors": {
+        "leather armor": {
+            "protection": 10
+        },
+        "chainmail": {
+            "protection": 15
+        },
+        "scale armor": {
+            "protection": 25
+        },
+        "plate armor": {
+            "protection": 40
+        }
+    }
+}
