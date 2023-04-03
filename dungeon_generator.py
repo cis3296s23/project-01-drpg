@@ -2,17 +2,18 @@ import random
 import math
 
 class Node:
-    def __init__(self, x, y, id) -> None:
+    def __init__(self, x, y, id=None) -> None:
         self.x = x
         self.y = y
-        self.id = id
+        if id:
+            self.id = id
 
     def is_equal(self, node2) -> bool:
         if (self.x == node2.x) and (self.y == node2.y):
             return True
         return False
     
-    def update_id(self, new_id):
+    def assign_id(self, new_id):
         self.id = new_id
     
     def __str__(self) -> str:
@@ -38,6 +39,29 @@ class Edge:
 
     def __str__(self) -> str:
         return str(self.nodes[0]) + " " + str(self.nodes[1]) + " : " + str(self.weight )
+    
+class Component:
+    def __init__(self, id) -> None:
+        self.id = id
+        self.nodes = []
+        self.cheapest_edge = None
+
+    def set_id(self, id):
+        self.id = id
+    
+    def add_node(self, node: Node):
+        node.assign_id(self.id)
+        self.nodes.append(node)
+
+    def update_ids(self):
+        for node in self.nodes:
+            node.assign_id(self.id)
+
+    def set_cheapest_edge(self, edge):
+        self.cheapest_edge = edge
+
+    def get_cheapest_edge(self):
+        return self.cheapest_edge
 
 class Cells:
     def __init__(self) -> None:
@@ -129,162 +153,151 @@ class DungeonObj:
                     for k in range(corner_x, corner_x+size_x):
                         self.ascii[j][k] = self.cells.floor
 
-
-    def calc_boruvka(self):
-        all_nodes = []
-        open_edges = []
-        closed_edges = []
+    def _boruvka_update_node_ids(self, edges, nodes):
+        id_map = []
         
+        for edge in edges:
+            id1 = edge.nodes[0].id
+            id2 = edge.nodes[1].id
+
+            appearances = []
+            for index0 in range(len(id_map)):
+                if id1 in id_map[index0] or id2 in id_map[index0]:
+                    appearances.append(index0)
+            
+            if len(appearances) == 0:
+                id_map.append([id1, id2])
+            
+            else:
+                id_map[appearances[0]].append(id1)
+                id_map[appearances[0]].append(id2)
+                if len(appearances) > 1:
+                    for index0 in appearances:
+                        if index0 != appearances[0]:
+                            for id0 in id_map[index0]:
+                                id_map[appearances[0]].append(id0)
+                            id_map[index0] = []
+                id_map[appearances[0]] = [*set(id_map[appearances[0]])]
+        
+        for node in nodes:
+            for idx in range(len(id_map)):
+                if node.id in id_map[idx]:
+                    node.id = idx*10
+        for node in nodes:
+            if node.id /10 > 1:
+                node.id /=10
+        return nodes
+
+
+    def _boruvka_generate_nodes(self):
+        nodes_list = []
         # create nodes
-        check_index = 0
+        check_idx = 0
+
+        def pick_node(all_nodes, check_index, new_node):
+            add_node = True
+            for j in all_nodes[check_index:]:
+                if new_node.is_equal(j):
+                    add_node = False
+            if add_node:
+                all_nodes.append(new_node)
+            return all_nodes
+        
         for room in self.rooms:
-            for i in range(room.corner_y, room.corner_y+room.size_y):
-                # NOTE: I know this sucks but I can't think of where a function would go
-                
+            for i in range(room.corner_y, room.corner_y+room.size_y):                
                 # left side
-                add_node = True
-                new_node = Node(room.corner_x, i, room.id)
-                for j in all_nodes[check_index:]:
-                    if new_node.is_equal(j):
-                        add_node = False
-                if add_node:
-                    all_nodes.append(new_node)
+                new_node = Node(room.corner_x, i)
+                new_node.assign_id(room.id)
+                nodes_list = pick_node(nodes_list, check_idx, new_node)
                 
                 # right side
-                add_node = True
-                new_node = Node(room.corner_x+room.size_x-1, i, room.id)
-                for j in all_nodes[check_index:]:
-                    if new_node.is_equal(j):
-                        add_node = False
-                if add_node:
-                    all_nodes.append(new_node)
+                new_node = Node(room.corner_x+room.size_x-1, i)
+                new_node.assign_id(room.id)
+                nodes_list = pick_node(nodes_list, check_idx, new_node)
             
             for i in range(room.corner_x, room.corner_x+room.size_x):
                 
                 # top row
-                add_node = True
-                new_node = Node(i, room.corner_y, room.id)
-                for j in all_nodes[check_index:]:
-                    if new_node.is_equal(j):
-                        add_node = False
-                if add_node:
-                    all_nodes.append(new_node)
+                new_node = Node(i, room.corner_y)
+                new_node.assign_id(room.id)
+                nodes_list = pick_node(nodes_list, check_idx, new_node)
                 
                 # bottom row
-                add_node = True
-                new_node = Node(i, room.corner_y+room.size_y-1, room.id)
-                for j in all_nodes[check_index:]:
-                    if new_node.is_equal(j):
-                        add_node = False
-                if add_node:
-                    all_nodes.append(new_node)
-            
-        # create edges between nodes
-        for node1 in all_nodes:
-            for node2 in all_nodes:
-                if node1.id != node2.id:
-                    open_edges.append(Edge(node1, node2))
+                new_node = Node(i, room.corner_y+room.size_y-1)
+                new_node.assign_id(room.id)
+                nodes_list = pick_node(nodes_list, check_idx, new_node)
         
+        return nodes_list
+
+    def _boruvka_is_preferred_over(self, e1: Edge, e2: Edge):
+        if e2 == None:
+            return True
+        if e1.weight < e2.weight:
+            return True
+        return False
+
+    def calc_boruvka(self):
+        verticies = self._boruvka_generate_nodes()
+        E_prime = []
+        components = {}
 
         # BEGIN BORUVKA
-        # create component register
-        components = {}
-        for i in range(len(self.rooms)):
-            components[i] = None
+        completed = False
         
-        solved = False
-        while not solved:
-            # iterate through edges
-            for edge in open_edges:
-                c1 = edge.nodes[0].id
-                c2 = edge.nodes[1].id
-                # print(c1, c2)
-
-                # handle empties
-                if not components[c1]:
-                    components[c1] = edge
-                if not components[c2]:
-                    components[c2] = edge
-                
-                # handle better options
-                if edge.weight < components[c1].weight:
-                    components[c1] = edge
-                if edge.weight < components[c2].weight:
-                    components[c2] = edge
-            # for comp in range(len(components)):
-            #     sss = "{}".format(comp) + " : " + str(components[comp])
-            #     print(sss)
+        while not completed:
+            # Find the connected components of F and assign to each vertex its component id
+            old_edges = []
+            for c in components:
+                edge = components[c].get_cheapest_edge()
+                old_edges.append(edge)
+  
+            verticies = self._boruvka_update_node_ids(old_edges, verticies)
             
-            # merge connected components
-            new_components = []
-            for i in components:
-                try:
-                    c1 = components[i].nodes[0].id
-                    c2 = components[i].nodes[1].id
-                except AttributeError as error:
-                    # print(components)
-                    # print(open_edges)
-                    self.final_edges = []
-                    return
-                
-                if not len(new_components):
-                    new_components.append([c1, c2])
-                else:
-                    indicies = []
-                    for j in range(len(new_components)):
-                        if c1 in new_components[j] or c2 in new_components[j]:
-                            indicies.append(j)
-                    if len(indicies) == 0:
-                        new_components.append([c1, c2])
-                    else:
-                        if c1 not in new_components[indicies[0]]:
-                            new_components[indicies[0]].append(c1)
-                        if c2 not in new_components[indicies[0]]:
-                            new_components[indicies[0]].append(c2)
-                        if len(indicies) != 1:
-                            for k in indicies:
-                                for l in new_components[k]:
-                                    if l not in new_components[0]:
-                                        new_components[0].append(l)
-                            new_components[k] = []
+            components = {}
+            for vertex in verticies:
+                if vertex.id not in components.keys():
+                    components[vertex.id] = Component(vertex.id)
+                components[vertex.id].add_node(vertex)
+
+            # Initialize the cheapest edge for each component to "None"
+            for c in components:
+                components[c].set_cheapest_edge(None)
+            # for each edge uv in E, where u and v are in different components of F:
+            for u in verticies:
+                for v in verticies:
+                    if u.id != v.id:
+                        uv = Edge(u,v)
+                        u_component = components[u.id]
+                        v_component = components[v.id]
+                        
+                        # let wx be the cheapest edge for the component of u
+                        wx = u_component.get_cheapest_edge()
+                        # if is-preferred-over(uv, wx) then
+                        if self._boruvka_is_preferred_over(uv, wx):
+                            # Set uv as the cheapest edge for the component of u
+                            u_component.set_cheapest_edge(uv)
+                            components[u.id] = u_component
+                        # let yz be the cheapest edge for the component of v
+                        yz = v_component.get_cheapest_edge()
+                        # if is-preferred-over(uv, yz) then
+                        if self._boruvka_is_preferred_over(uv, yz):
+                            # Set uv as the cheapest edge for the component of v
+                            v_component.set_cheapest_edge(uv)
+                            components[v.id] = v_component
             
-            # finalize new components list
-            new_components = [comp for comp in new_components if len(comp) != 0]
+            # if all components have cheapest edge set to "None" then
+            all_none = True
+            for c in components:
+                if components[c].get_cheapest_edge() != None:
+                    all_none = False
+                    # for each component whose cheapest edge is not "None" do
+                    # Add its cheapest edge to E'
+                    E_prime.append(components[c].get_cheapest_edge())
+            if all_none:
+                # no more trees can be merged -- we are finished
+                completed = True
 
-            # add closed edges and remove from open list
-            for e in components:
-                # print(components[e])
-                closed_edges.append(components[e])
-            for edge_idx in range(len(open_edges)):
-                for comp_idx in range(len(components)):
-                    if open_edges[edge_idx].is_equal(components[comp_idx]):
-                        open_edges[edge_idx] == None
-            open_edges = [e for e in open_edges if e != None]
-
-            # update components dict
-            updated_components_dict = {}
-            for i in range(len(new_components)):
-                updated_components_dict[i] = None
-            components = updated_components_dict
-
-            # update node refs for remaining open edges
-            for edge_idx in range(len(open_edges)):
-                for comp_idx in range(len(new_components)):
-                    for itera in range(2):
-                        if open_edges[edge_idx].nodes[itera].id in new_components[comp_idx]:
-                            open_edges[edge_idx].nodes[itera].update_id(comp_idx)
-            
-            # remove any edges that connect to the same component
-            for edge_idx in range(len(open_edges)):
-                if open_edges[edge_idx].nodes[0].id == open_edges[edge_idx].nodes[1].id:
-                    open_edges[edge_idx] = None
-            open_edges = [e for e in open_edges if e != None]
-            
-            # check if we have a solution
-            if len(new_components) == 1:
-                solved = True
-
-        self.final_edges = closed_edges             
+        self.final_edges = E_prime           
             
 
     def place_paths(self):
@@ -374,13 +387,9 @@ class DungeonObj:
             
 
 def generator_output():
-    dungeon_ascii = None
-    dungeon_obj = None
-    while not dungeon_ascii:
-        dungeon_obj = DungeonObj(10, 8, 32)
-        dungeon_ascii = dungeon_obj.generate()
-    return dungeon_obj
-
+    dungeon = DungeonObj(10, 8, 32)
+    dungeon_ascii = dungeon.generate()
+    return dungeon_ascii
 
 if __name__ == "__main__":
     # random.seed(3)
