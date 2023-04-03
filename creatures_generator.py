@@ -1,12 +1,15 @@
+from character_manager import CharacterManager
+import json
+import random
+
 class Creature:
-    def __init__(self, character_manager, level):
-        self.character_manager = character_manager
+    def __init__(self, lvl):
+        self.character_manager = CharacterManager()
         with open('creatures.json', 'r') as f:
             data = json.load(f)
             creatures = random.choice(data['creatures'])
-            self.name = f"{creatures['adjectives'][random.randint(0, len(creatures['adjectives']) - 1)]} {creatures['nouns'][random.randint(0, len(creatures['nouns']) - 1)]}"
+            self.name = f"{creatures['adjective']} {creatures['noun']}"
             self.symbol = creatures['symbol']
-            self.level = level
-            self.health = creatures['health'] * level
-            self.attack = creatures['attack'] * level
-            self.defense = creatures['defense'] * level
+            self.hp = creatures['hp'] * lvl
+            self.attack = creatures['attack'] * lvl
+            self.defense = creatures['defense'] * lvl
