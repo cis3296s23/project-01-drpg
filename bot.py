@@ -8,10 +8,10 @@ async def standard_dungeon(message, client):
         sent_message = await message.channel.send(new_map)        
         for emoji in ['\U00002B06', '\U00002B07', '\U00002B05', '\U000027A1']:
             await sent_message.add_reaction(emoji)
-        await check_reaction(client, sent_message)
+        await check_reaction(client, sent_message, message)
         new_map = None
 
-async def check_reaction(client, sent_message):
+async def check_reaction(client, sent_message, message):
     # please note that this only handles the first reaction
     try:
          # Wait for a reaction to be added to the message
@@ -42,10 +42,17 @@ async def check_reaction(client, sent_message):
         enemy_obj = movement(emoji_r)
         # print(global_dungeon.get_current_map())
         if enemy_obj:
+            await message.channel.send(f'Player is now fighting lvl {enemy_obj.character_manager.lvl} {enemy_obj.name}')
             result = fight_enemy(enemy_obj)
             if result:
+                await message.channel.send(f'Player has slain {enemy_obj.name}')
                 global_dungeon.remove_creature(enemy_obj)
                 movement(emoji_r)
+            else:
+                await message.channel.send(f'Player has been slain by {enemy_obj.name}')
+                global_dungeon.reset_map()
+
+
         # return global_dungeon.get_current_map()
     except Exception as e:
         print(e)
@@ -54,14 +61,14 @@ async def print_stats(username, message):
     await message.channel.send(f"```{username}'s Stats\nLevel: {global_player.lvl}\nHealth: {global_player.hp}\nStrength: {global_player.str}\nDexterity: {global_player.dex}\nEndurance: {global_player.end}\nCurrent XP: {global_player.xp}```")
 
 def fight_enemy(creature):
-    while global_player.hp > 0 and creature.hp > 0:
+    while global_player.hp > 0 and creature.character_manager.hp > 0:
         p_attack = global_player.calc_damage_dealt()
-        creature.hp -= p_attack
+        creature.character_manager.hp -= p_attack
 
-        if creature.hp <= 0:  # return true when the player beats the enemy
-            return True;
+        if creature.character_manager.hp <= 0:  # return true when the player beats the enemy
+            return True
 
-        c_attack = random.randint(1, creature.str)
+        c_attack = random.randint(1, creature.character_manager.str)
         p_reduction = global_player.calc_damage_taken(c_attack)
         global_player.hp -= p_reduction
 

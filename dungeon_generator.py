@@ -197,7 +197,6 @@ class DungeonObj:
                 node.id /=10
         return nodes
 
-
     def _boruvka_generate_nodes(self):
         nodes_list = []
         # create nodes
@@ -353,7 +352,7 @@ class DungeonObj:
         
     def move_player(self, dir):
         # self.reset_map()
-        print("move player called")
+        # print("move player called")
         # get player pos
         player_pos = None
         for i in range(len(self.ascii)):
@@ -382,7 +381,8 @@ class DungeonObj:
             pass
         # swap tiles
         if mov:
-            if mov != self.cells.floor:
+            if self.ascii[mov[0]][mov[1]] != self.cells.floor:
+                print(self.ascii[mov[0]][mov[1]])
                 return self.ascii[mov[0]][mov[1]]
             else:
                 self.ascii[player_pos[0]][player_pos[1]] = self.cells.floor
@@ -391,7 +391,10 @@ class DungeonObj:
             print("INVALID MOVE ERROR")
 
     def remove_creature(self, enemy_obj):
-        pass
+        for i in range(len(self.ascii)):
+            for j in range(len(self.ascii[0])):
+                if self.ascii[i][j] == enemy_obj:
+                    self.ascii[i][j] = self.cells.floor
 
     def place_creatures(self, n, player_level):
         # places n creatures on the map
