@@ -1,4 +1,5 @@
 import discord
+import random
 
 async def standard_dungeon(message, client):
     # This is the standard dungeon loop
@@ -53,8 +54,19 @@ async def print_stats(username, message):
     await message.channel.send(f"```{username}'s Stats\nLevel: {global_player.lvl}\nHealth: {global_player.hp}\nStrength: {global_player.str}\nDexterity: {global_player.dex}\nEndurance: {global_player.end}\nCurrent XP: {global_player.xp}```")
 
 def fight_enemy(creature):
-    # for now, we will just keep rolling stats until someone dies
-    pass
+    while global_player.hp > 0 and creature.hp > 0:
+        p_attack = global_player.calc_damage_dealt()
+        creature.hp -= p_attack
+
+        if creature.hp <= 0:  # return true when the player beats the enemy
+            return True;
+
+        c_attack = random.randint(1, creature.str)
+        p_reduction = global_player.calc_damage_taken(c_attack)
+        global_player.hp -= p_reduction
+
+        if global_player.hp <= 0:  # return false when the creatuee beats the player
+            return False
 
 
 def run_discord_bot(player_obj, dungeon_obj):
