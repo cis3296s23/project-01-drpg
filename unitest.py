@@ -2,7 +2,6 @@ import unittest
 from gear_generation import Weapon, Armor
 import os
 
-os.chdir('/Users/mikaya/Documents/GitHub/project-01-drpg/')
 
 class TestWeaponAndArmor(unittest.TestCase):
 

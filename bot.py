@@ -1,22 +1,13 @@
 import discord
-import responses
-
-def initialize_bot(player_obj, dungeon_obj):
-    global_dungeon = dungeon_obj
-    global_player = player_obj
 
 async def standard_dungeon(message, client):
     # This is the standard dungeon loop
-    sent_message = await message.channel.send(str(global_dungeon))
-    for emoji in ['\U00002B06', '\U00002B07', '\U00002B05', '\U000027A1']:
-            await sent_message.add_reaction(emoji)
-    new_map = None
     while True:
-        while not new_map:
-            new_map = await check_reaction(client, sent_message)
-        sent_message = await message.channel.send(new_map)
+        new_map = str(global_dungeon)
+        sent_message = await message.channel.send(new_map)        
         for emoji in ['\U00002B06', '\U00002B07', '\U00002B05', '\U000027A1']:
             await sent_message.add_reaction(emoji)
+        await check_reaction(client, sent_message)
         new_map = None
 
 async def check_reaction(client, sent_message):
@@ -28,20 +19,31 @@ async def check_reaction(client, sent_message):
                     reaction.message.id == sent_message.id)
         
         reaction, user = await client.wait_for('reaction_add', check=check)
-        return responses.handle_movement(reaction, global_dungeon)
-        # emoji = reaction
-        # if emoji == '\U00002B06':
-        #     global_dungeon.move_player("up")
-        # elif emoji == '\U00002B07':
-        #     global_dungeon.move_player("down")
-        # elif emoji == '\U00002B05':
-        #     global_dungeon.move_player("left")
-        # elif emoji == '\U000027A1':
-        #     global_dungeon.move_player("right")
-        # else:
-        #     pass
+        # return responses.handle_movement(reaction, global_dungeon)
+        emoji_r = reaction.emoji
+        def movement(emoji):
+            if emoji == '\U00002B06' or emoji == '⬆':
+                enemy = global_dungeon.move_player("up")
+                print("up")
+            elif emoji == '\U00002B07' or emoji == '⬇':
+                enemy = global_dungeon.move_player("down")
+                print("down")
+            elif emoji == '\U00002B05' or emoji == '⬅':
+                enemy = global_dungeon.move_player("left")
+                print("left")
+            elif emoji == '\U000027A1' or emoji == '➡':
+                enemy = global_dungeon.move_player("right")
+                print("right")
+            else:
+                print("failed to recognize")
+                print(emoji.encode('unicode_escape').decode())
+            return enemy
+        enemy_obj = movement(emoji_r)
         # print(global_dungeon.get_current_map())
-        
+        if enemy_obj:
+            result = fight_enemy(enemy_obj)
+            if result:
+                
         # return global_dungeon.get_current_map()
     except Exception as e:
         print(e)
@@ -49,7 +51,7 @@ async def check_reaction(client, sent_message):
 async def print_stats(username, message):
     await message.channel.send(f"```{username}'s Stats\nLevel: {global_player.lvl}\nHealth: {global_player.hp}\nStrength: {global_player.str}\nDexterity: {global_player.dex}\nEndurance: {global_player.end}\nCurrent XP: {global_player.xp}```")
 
-def fight_enemy(player, creature):
+def fight_enemy(creature):
     # for now, we will just keep rolling stats until someone dies
     pass
 

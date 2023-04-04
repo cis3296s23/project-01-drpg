@@ -352,6 +352,7 @@ class DungeonObj:
         return True
         
     def move_player(self, dir):
+        # self.reset_map()
         print("move player called")
         # get player pos
         player_pos = None
@@ -381,8 +382,11 @@ class DungeonObj:
             pass
         # swap tiles
         if mov:
-            self.ascii[player_pos[0]][player_pos[1]] = self.cells.floor
-            self.ascii[mov[0]][mov[1]] = self.cells.player
+            if mov != self.cells.floor:
+                return self.ascii[mov[0]][mov[1]]
+            else:
+                self.ascii[player_pos[0]][player_pos[1]] = self.cells.floor
+                self.ascii[mov[0]][mov[1]] = self.cells.player
         else:
             print("INVALID MOVE ERROR")
 
@@ -401,13 +405,8 @@ class DungeonObj:
 
     def get_current_map(self):
         return str(self)
-            
-
-def generator_output():
-    dungeon = DungeonObj(10, 8, 32)
-    dungeon_ascii = dungeon.generate()
-    return dungeon_ascii
 
 if __name__ == "__main__":
     # random.seed(3)
-    print(generator_output())
+    # print(generator_output())
+    pass
