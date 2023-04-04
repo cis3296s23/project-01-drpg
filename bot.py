@@ -46,9 +46,8 @@ async def check_reaction(client, sent_message):
     except Exception as e:
         print(e)
 
-async def print_stats(client):
-    pass
-    # print the stats here, get them from the global object
+async def print_stats(username, client):
+    await client.send_message(f"```{username}'s Stats\nLevel: {global_player.lvl}\nHealth: {global_player.hp}\nStrength: {global_player.str}\nDexterity: {global_player.dex}\nEndurance: {global_player.end}\n Current XP: {global_player.xp}```")
 
 def fight_enemy(player, creature):
     # for now, we will just keep rolling stats until someone dies
@@ -86,6 +85,6 @@ def run_discord_bot(player_obj, dungeon_obj):
         if user_message == '!dungeon':
             await standard_dungeon(message, client)
         elif user_message == '!stat':
-            await print_stats(client)
+            await print_stats(username, client)
 
     client.run(TOKEN)
