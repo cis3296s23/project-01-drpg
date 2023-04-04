@@ -390,6 +390,9 @@ class DungeonObj:
         else:
             print("INVALID MOVE ERROR")
 
+    def remove_creature(self, enemy_obj):
+        pass
+
     def place_creatures(self, n, player_level):
         # places n creatures on the map
         for i in range(n):

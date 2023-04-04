@@ -43,7 +43,8 @@ async def check_reaction(client, sent_message):
         if enemy_obj:
             result = fight_enemy(enemy_obj)
             if result:
-                
+                global_dungeon.remove_creature(enemy_obj)
+                movement(emoji_r)
         # return global_dungeon.get_current_map()
     except Exception as e:
         print(e)
