@@ -1,30 +1,18 @@
 import discord
-import responses
+import random
 
-async def send_message(message, user_message, client, is_private):
-    try:
-        response = responses.get_response(user_message)
-        if response[0] != None:
-            sent_message = await message.author.send(response[0]) if is_private else await message.channel.send(response[0])
-            if response[1] != None:
-                # add emojis
-                for emoji in response[1]:
-                    await sent_message.add_reaction(emoji)
-                # check reaction
-                new_map = None
-                while True:
-                    while not new_map:
-                        new_map = await check_reaction(client, sent_message)
-                    sent_message = await message.channel.send(new_map)
-                    for emoji in ['\U00002B06', '\U00002B07', '\U00002B05', '\U000027A1']:
-                        await sent_message.add_reaction(emoji)
-                    new_map = None
-    
-    except Exception as e:
-        print(e)
+async def standard_dungeon(message, client):
+    # This is the standard dungeon loop
+    while True:
+        new_map = str(global_dungeon)
+        sent_message = await message.channel.send(new_map)        
+        for emoji in ['\U00002B06', '\U00002B07', '\U00002B05', '\U000027A1']:
+            await sent_message.add_reaction(emoji)
+        await check_reaction(client, sent_message, message)
+        new_map = None
 
-async def check_reaction(client, sent_message):
-    # please not that this only handles the first reaction
+async def check_reaction(client, sent_message, message):
+    # please note that this only handles the first reaction
     try:
          # Wait for a reaction to be added to the message
         def check(reaction, user):
@@ -32,12 +20,67 @@ async def check_reaction(client, sent_message):
                     reaction.message.id == sent_message.id)
         
         reaction, user = await client.wait_for('reaction_add', check=check)
-        return responses.handle_movement(reaction.emoji)
+        # return responses.handle_movement(reaction, global_dungeon)
+        emoji_r = reaction.emoji
+        def movement(emoji):
+            if emoji == '\U00002B06' or emoji == '⬆':
+                enemy = global_dungeon.move_player("up")
+                print("up")
+            elif emoji == '\U00002B07' or emoji == '⬇':
+                enemy = global_dungeon.move_player("down")
+                print("down")
+            elif emoji == '\U00002B05' or emoji == '⬅':
+                enemy = global_dungeon.move_player("left")
+                print("left")
+            elif emoji == '\U000027A1' or emoji == '➡':
+                enemy = global_dungeon.move_player("right")
+                print("right")
+            else:
+                print("failed to recognize")
+                print(emoji.encode('unicode_escape').decode())
+            return enemy
+        enemy_obj = movement(emoji_r)
+        # print(global_dungeon.get_current_map())
+        if enemy_obj:
+            await message.channel.send(f'Player is now fighting lvl {enemy_obj.character_manager.lvl} {enemy_obj.name}')
+            result = fight_enemy(enemy_obj)
+            if result:
+                await message.channel.send(f'Player has slain {enemy_obj.name}')
+                global_dungeon.remove_creature(enemy_obj)
+                movement(emoji_r)
+            else:
+                await message.channel.send(f'Player has been slain by {enemy_obj.name}')
+                global_dungeon.reset_map()
+
+
+        # return global_dungeon.get_current_map()
     except Exception as e:
         print(e)
 
+async def print_stats(username, message):
+    await message.channel.send(f"```{username}'s Stats\nLevel: {global_player.lvl}\nHealth: {global_player.hp}\nStrength: {global_player.str}\nDexterity: {global_player.dex}\nEndurance: {global_player.end}\nCurrent XP: {global_player.xp}```")
 
-def run_discord_bot():
+def fight_enemy(creature):
+    while global_player.hp > 0 and creature.character_manager.hp > 0:
+        p_attack = global_player.calc_damage_dealt()
+        creature.character_manager.hp -= p_attack
+
+        if creature.character_manager.hp <= 0:  # return true when the player beats the enemy
+            return True
+
+        c_attack = random.randint(1, creature.character_manager.str)
+        p_reduction = global_player.calc_damage_taken(c_attack)
+        global_player.hp -= p_reduction
+
+        if global_player.hp <= 0:  # return false when the creatuee beats the player
+            return False
+
+
+def run_discord_bot(player_obj, dungeon_obj):
+    global global_dungeon
+    global global_player
+    global_dungeon = dungeon_obj
+    global_player = player_obj
     with open("TOKEN.txt", 'r') as tkn:
         TOKEN = tkn.read()
     intents = discord.Intents.default()
@@ -61,10 +104,9 @@ def run_discord_bot():
         print(f'{username} said: "{user_message}" ({channel})')
 
         # handle response
-        if user_message[0] == '?':
-            user_message = user_message[1:]
-            await send_message(message, user_message, client, is_private=True)
-        else:
-            await send_message(message, user_message, client, is_private=False)
+        if user_message == '!dungeon':
+            await standard_dungeon(message, client)
+        elif user_message == '!stat':
+            await print_stats(username, message)
 
     client.run(TOKEN)
