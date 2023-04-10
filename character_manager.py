@@ -6,6 +6,7 @@ class CharacterManager:
         self.end = end
         self.dex = dex
         self.hp = hp
+        self.xp = xp
         self.lvl = lvl
         self.weapon = weapon
         self.armor = armor

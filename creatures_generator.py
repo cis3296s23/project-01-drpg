@@ -18,3 +18,6 @@ class Creature:
               xp=0,
               lvl=lvl
             )
+    
+    def __str__(self) -> str:
+        return self.symbol
