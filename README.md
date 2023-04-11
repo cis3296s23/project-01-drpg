@@ -8,8 +8,8 @@ Dungeon RPG is a Discord bot that allows players to engage in combat and have fu
  - Right click the channel you want your Discord bot to be in and copy the Channel ID
  - In bot.py, enter the Discord Bot Token & Channel ID into the section shown below
 ```
-def run_discord_bot(player_obj, dungeon_obj): 
-TOKEN = 'enter token here'
+CHANNEL_ID = 
+BOT_TOKEN = 'enter token here'
 ```
 - Install Discord API
   - Go to terminal, and enter below
