@@ -114,7 +114,7 @@ class DungeonObj:
 
     def __str__(self):
         string = ""
-        for i in range(int(self.dungeon_size/2)):
+        for i in range(int(self.dungeon_size)):
             for j in range(self.dungeon_size):
                 string += str(self.ascii[i][j])
             string += "\n"
@@ -122,7 +122,7 @@ class DungeonObj:
     
     def reset_map(self):
         self.ascii = [
-            [self.cells.empty for i in range(int(self.dungeon_size))] for j in range(int(self.dungeon_size/2))
+            [self.cells.empty for i in range(int(self.dungeon_size))] for j in range(int(self.dungeon_size))
         ]
 
     def get_start_pos(self):
@@ -143,11 +143,11 @@ class DungeonObj:
                 
                 # generate 4th quadrant corner
                 corner_x = random.randint(0, self.dungeon_size-2)
-                corner_y = random.randint(0, int(self.dungeon_size/2)-2)
+                corner_y = random.randint(0, int(self.dungeon_size)-2)
                 
                 # check that this is a valid placement
                 valid = True
-                if (corner_y+size_y+self.buffer >= int(self.dungeon_size/2)) or (corner_x+size_x+self.buffer >= self.dungeon_size):
+                if (corner_y+size_y+self.buffer >= int(self.dungeon_size)) or (corner_x+size_x+self.buffer >= self.dungeon_size):
                     valid = False
                 if valid:
                     for j in range(corner_y-self.buffer, corner_y+size_y+self.buffer):
