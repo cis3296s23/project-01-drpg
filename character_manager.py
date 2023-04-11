@@ -23,10 +23,10 @@ class CharacterManager:
         return damage * (1 - self.end/100)
 
     def modifyHP(self, amount):
-        # if amount < 0
-            # self.hp += amount # future feature but will include just in case
-        # else
-        self.hp -= self.calc_damage_taken(amount)   # reduce hp based on calc_damage_taken
+        if amount > self.hp:
+            self.hp = 0
+        else:
+            self.hp -= amount  # reduce hp based on calc_damage_taken
 
     def check_lvl_up(self):
         # to be decided
