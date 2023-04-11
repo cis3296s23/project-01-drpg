@@ -1,5 +1,84 @@
 import discord
 import random
+from discord.ext import commands
+from PIL import Image
+import creatures_generator
+import dungeon_generator
+import map_image
+
+def regenerate_dungeon():
+    dungeon_obj = global_dungeon
+    image = Image.open("output_imgs/base_dungeon.png")
+    image.save("output_imgs/working_dungeon.png")
+    
+    for i in range(len(dungeon_obj.ascii)):
+        for j in range(len(dungeon_obj.ascii[i])):
+            # check if there is a creature at this position by checking the class of the object
+            if isinstance(dungeon_obj.ascii[i][j], creatures_generator.Creature):
+                if dungeon_obj.ascii[i][j].name == "goblin":
+                    token_img = "dungeon_imgs/Goblin.jpg"
+                elif dungeon_obj.ascii[i][j].name == "troll":
+                    token_img = "dungeon_imgs/Troll.jpg"
+                elif dungeon_obj.ascii[i][j].name == "dragon":
+                    token_img = "dungeon_imgs/Dragon.jpg"
+                elif dungeon_obj.ascii[i][j].name == "skeleton":
+                    token_img = "dungeon_imgs/Skeleton.jpg"
+                    
+                map_image.place_token(
+                    "output_imgs/working_dungeon.png", 
+                    token_img,
+                    (i, j),
+                    "output_imgs/working_dungeon.png")
+            elif dungeon_obj.ascii[i][j] == dungeon_generator.Cells().player:
+                map_image.place_token(
+                    "output_imgs/working_dungeon.png", 
+                    "dungeon_imgs/Player.png",
+                    (i, j),
+                    "output_imgs/working_dungeon.png")
+
+async def handle_move(user_message, message, client):
+    # split the message by spaces
+    split_message = user_message.split()
+    move = split_message[1]
+    # convert this into ij coordinates
+    y = ord(move[0]) - 97
+    x = int(move[1:]) -1
+    # check if the move is valid
+    if x < 0 or x > 16 or y < 0 or y > 16:
+        await message.channel.send("Invalid move, please try again.")
+        return
+    
+    if global_dungeon.ascii[y][x] == dungeon_generator.Cells().empty:
+        await message.channel.send("Invalid move, please try again.")
+        return
+    
+    if global_dungeon.ascii[y][x] == dungeon_generator.Cells().floor:
+        for i in range(len(global_dungeon.ascii)):
+            for j in range(len(global_dungeon.ascii[i])):
+                if global_dungeon.ascii[i][j] == dungeon_generator.Cells().player:
+                    global_dungeon.ascii[i][j] = dungeon_generator.Cells().floor
+        global_dungeon.ascii[y][x] = dungeon_generator.Cells().player
+        regenerate_dungeon()
+        await message.channel.send(file=discord.File("output_imgs/working_dungeon.png"))
+        return
+    if isinstance(global_dungeon.ascii[y][x], creatures_generator.Creature):
+        enemy_obj = global_dungeon.ascii[y][x]
+        result = await fight_enemy(enemy_obj, message, client)
+        if result:
+            await message.channel.send(f'Player has slain {enemy_obj.name}')
+            global_dungeon.remove_creature(enemy_obj)
+            for i in range(len(global_dungeon.ascii)):
+                for j in range(len(global_dungeon.ascii[i])):
+                    if global_dungeon.ascii[i][j] == dungeon_generator.Cells().player:
+                        global_dungeon.ascii[i][j] = dungeon_generator.Cells().floor
+            global_dungeon.ascii[y][x] = dungeon_generator.Cells().player
+            regenerate_dungeon()
+            await message.channel.send(file=discord.File("output_imgs/working_dungeon.png"))
+        else:
+            await message.channel.send(f'Player has been slain by {enemy_obj.name}')
+            global_dungeon.reset_map()
+
+    
 
 
 async def standard_dungeon(message, client):
@@ -11,7 +90,6 @@ async def standard_dungeon(message, client):
             await sent_message.add_reaction(emoji)
         await check_reaction(client, sent_message, message)
         new_map = None
-
 
 async def check_reaction(client, sent_message, message):
     # please note that this only handles the first reaction
@@ -171,8 +249,12 @@ def run_discord_bot(player_obj, dungeon_obj):
 
         # handle response
         if user_message == '!dungeon':
-            await standard_dungeon(message, client)
+            await message.channel.send(file=discord.File("output_imgs/working_dungeon.png"))
         elif user_message == '!stat':
             await print_stats(username, message)
+        # check if message begins with "!move"
+        elif user_message.startswith('!move'):
+            await handle_move(user_message, message, client)
+
 
     client.run(TOKEN)
