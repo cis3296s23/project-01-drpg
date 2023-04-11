@@ -3,12 +3,13 @@ import random
 
 class Weapon:
     def __init__(self):
-        with open('weapons.json', 'r') as f:
+        with open('weapons.json') as f:
             data = json.load(f)
-            weapons = random.choice(data['weapons']) # chooses random weapon in json file
-            self.name = f"{weapons}"
-            self.damage = data['weapons'][weapons]['damage']
-            self.speed = data['weapons'][weapons]['speed']
+            weapons = data['weapons']
+            weapon_data = random.choice(weapons)
+            self.name = weapon_data['name']
+            self.damage = weapon_data['damage']
+            self.speed = weapon_data['speed']
 
 class Armor:
     def __init__(self):
