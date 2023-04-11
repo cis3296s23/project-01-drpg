@@ -43,7 +43,7 @@ async def check_reaction(client, sent_message, message):
         # print(global_dungeon.get_current_map())
         if enemy_obj:
             await message.channel.send(f'Player is now fighting lvl {enemy_obj.character_manager.lvl} {enemy_obj.name}')
-            result = fight_enemy(enemy_obj, message, client)
+            result = await fight_enemy(enemy_obj, message, client)
             if result:
                 await message.channel.send(f'Player has slain {enemy_obj.name}')
                 global_dungeon.remove_creature(enemy_obj)
@@ -63,12 +63,12 @@ async def print_stats(username, message):
 async def fight_enemy(creature, message, client):
     await message.channel.send(f'You have encountered an enemy!')
     while global_player.hp > 0 and creature.character_manager.hp > 0:
-        await message.channel.send(f'Do you want to !attack, !counter?, or !fight')
+        await message.channel.send(f'Do you want to [!fight / !counter / !auto]')
         def check(m):
-            return m.author == message.author and m.channel == message.channel and m.content in ['!attack', '!counter', '!fight']
+            return m.author == message.author and m.channel == message.channel and m.content in ['!fight', '!counter', '!auto']
         user_move = await client.wait_for('message', check=check)
 
-        if user_move.content == '!attack':
+        if user_move.content == '!fight':
             p_attack = global_player.calc_damage_dealt()
             creature.character_manager.hp -= p_attack
 
@@ -94,8 +94,8 @@ async def fight_enemy(creature, message, client):
                 p_attack = (global_player.calc_damage_dealt() * 2)  # high risk high reward
                 creature.character_manager.hp -= p_attack
 
-                await message.channel.send(f'Successful Counter!'
-                                           f'Player Attack: {p_attack}'
+                await message.channel.send(f'Successful Counter!\n'
+                                           f'Player Attack: {p_attack}\n'
                                            f'Enemy Health: {creature.character_manager.hp}')
 
                 if creature.character_manager.hp <= 0:  # return true when the player beats the enemy
@@ -106,14 +106,14 @@ async def fight_enemy(creature, message, client):
                 p_reduction = global_player.calc_damage_taken(c_attack)
                 global_player.hp -= p_reduction
 
-                await message.channel.send(f'Unsuccessful Counter!'
-                                           f'Enemy Attack: {p_reduction}'
+                await message.channel.send(f'Unsuccessful Counter!\n'
+                                           f'Enemy Attack: {p_reduction}\n'
                                            f'Player Health: {global_player.hp}')
 
                 if global_player.hp <= 0:  # return false when the creature beats the player
                     return False
 
-        elif user_move.content == '!fight':
+        elif user_move.content == '!auto':
             while global_player.hp > 0 and creature.character_manager.hp > 0:
                 p_attack = global_player.calc_damage_dealt()
                 creature.character_manager.hp -= p_attack
