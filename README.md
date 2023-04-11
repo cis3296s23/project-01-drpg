@@ -1,7 +1,6 @@
 # DungeonRPG
 Dungeon RPG is a Discord bot that allows players to engage in combat and have fun on the Discord platform using the Discord API Framework utilizing Python as the programming language 
 
-![This is a screenshot.](images.png)
 # How to run
  - Download the latest [release](https://github.com/cis3296s23/DungeonHuntingRPG/releases)
  - Open the code in an IDE/terminal and move files into the directory of the project
