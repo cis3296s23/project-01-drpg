@@ -43,7 +43,7 @@ async def check_reaction(client, sent_message, message):
         # print(global_dungeon.get_current_map())
         if enemy_obj:
             await message.channel.send(f'Player is now fighting lvl {enemy_obj.character_manager.lvl} {enemy_obj.name}')
-            result = fight_enemy(enemy_obj)
+            result = fight_enemy(enemy_obj, message, client)
             if result:
                 await message.channel.send(f'Player has slain {enemy_obj.name}')
                 global_dungeon.remove_creature(enemy_obj)
@@ -60,20 +60,77 @@ async def check_reaction(client, sent_message, message):
 async def print_stats(username, message):
     await message.channel.send(f"```{username}'s Stats\nLevel: {global_player.lvl}\nHealth: {global_player.hp}\nStrength: {global_player.str}\nDexterity: {global_player.dex}\nEndurance: {global_player.end}\nCurrent XP: {global_player.xp}```")
 
-def fight_enemy(creature):
+async def fight_enemy(creature, message, client):
+    await message.channel.send(f'You have encountered an enemy!')
     while global_player.hp > 0 and creature.character_manager.hp > 0:
-        p_attack = global_player.calc_damage_dealt()
-        creature.character_manager.hp -= p_attack
+        await message.channel.send(f'Do you want to !attack, !counter?, or !fight')
+        def check(m):
+            return m.author == message.author and m.channel == message.channel and m.content in ['!attack', '!counter', '!fight']
+        user_move = await client.wait_for('message', check=check)
 
-        if creature.character_manager.hp <= 0:  # return true when the player beats the enemy
-            return True
+        if user_move.content == '!attack':
+            p_attack = global_player.calc_damage_dealt()
+            creature.character_manager.hp -= p_attack
 
-        c_attack = random.randint(1, creature.character_manager.str)
-        p_reduction = global_player.calc_damage_taken(c_attack)
-        global_player.hp -= p_reduction
+            await message.channel.send(f'Player Attack: {p_attack}\n'
+                                       f'Enemy Health: {creature.character_manager.hp}')
 
-        if global_player.hp <= 0:  # return false when the creatuee beats the player
-            return False
+            if creature.character_manager.hp <= 0:  # return true when the player beats the enemy
+                return True
+
+            c_attack = random.randint(1, creature.character_manager.str)
+            p_reduction = global_player.calc_damage_taken(c_attack)
+            global_player.hp -= p_reduction
+
+            await message.channel.send(f'Enemy Attack: {c_attack}\n'
+                                       f'Player Health: {global_player.hp}')
+
+            if global_player.hp <= 0:  # return false when the creature beats the player
+                return False
+
+        elif user_move.content == '!counter':
+            chance = random.randint(1, 2)
+            if chance == 1:  # 50/50 chance to proc counter
+                p_attack = (global_player.calc_damage_dealt() * 2)  # high risk high reward
+                creature.character_manager.hp -= p_attack
+
+                await message.channel.send(f'Successful Counter!'
+                                           f'Player Attack: {p_attack}'
+                                           f'Enemy Health: {creature.character_manager.hp}')
+
+                if creature.character_manager.hp <= 0:  # return true when the player beats the enemy
+                    return True
+
+            else:
+                c_attack = (random.randint(1, creature.character_manager.str) * 4)  # missed, leaves you wide open for attacks
+                p_reduction = global_player.calc_damage_taken(c_attack)
+                global_player.hp -= p_reduction
+
+                await message.channel.send(f'Unsuccessful Counter!'
+                                           f'Enemy Attack: {p_reduction}'
+                                           f'Player Health: {global_player.hp}')
+
+                if global_player.hp <= 0:  # return false when the creature beats the player
+                    return False
+
+        elif user_move.content == '!fight':
+            while global_player.hp > 0 and creature.character_manager.hp > 0:
+                p_attack = global_player.calc_damage_dealt()
+                creature.character_manager.hp -= p_attack
+
+                if creature.character_manager.hp <= 0:
+                    return True
+
+                c_attack = random.randint(1, creature.character_manager.str)
+                p_reduction = global_player.calc_damage_taken(c_attack)
+                global_player.hp -= p_reduction
+
+                if global_player.hp <= 0:
+                    return False
+
+        else:
+            await message.channel.send('Invalid move!')
+
 
 
 def run_discord_bot(player_obj, dungeon_obj):
