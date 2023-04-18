@@ -1,6 +1,10 @@
 import json
 import unittest
+from character_manager import CharacterManager
 from creatures_generator import Creature
+import os
+
+os.chdir('/Users/mikaya/Documents/GitHub/project-01-drpg/')
 
 class TestCreature(unittest.TestCase):
 
@@ -9,7 +13,6 @@ class TestCreature(unittest.TestCase):
         self.assertIsNotNone(creature.name)
         self.assertIsNotNone(creature.symbol)
         self.assertIsNotNone(creature.character_manager)
-        print(creature.name)
 
 if __name__ == '__main__':
     suite = unittest.TestLoader().loadTestsFromTestCase(TestCreature)

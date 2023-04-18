@@ -1,11 +1,14 @@
 from character_manager import CharacterManager
 import json
 import random
-
+import os
 class Creature:
 
-    def __init__(self, lvl):
-        with open('creatures.json', 'r') as f:
+     def __init__(self,lvl=1):
+        project_root = os.path.dirname(os.path.abspath(__file__))
+        creature_file_path = os.path.join(project_root, 'creatures.json')
+        
+        with open(creature_file_path) as f:
             data = json.load(f)
             creatures = random.choice(data["creatures"])
             self.name = creatures['name']
@@ -20,5 +23,5 @@ class Creature:
               lvl=lvl
             )
     
-    def __str__(self) -> str:
+     def __str__(self) -> str:
         return self.symbol
