@@ -5,6 +5,7 @@ from PIL import Image
 import creatures_generator
 import dungeon_generator
 import map_image
+import requests
 
 def make_new_floor():
     global global_player
@@ -179,14 +180,35 @@ async def check_reaction(client, sent_message, message):
 
 
 async def print_stats(username, message):
+    embed = discord.Embed(title="The Bearer of Fire", color=0x00990000)
+
+    with open('knight.gif', 'wb') as f:
+        response = requests.get('https://i.imgur.com/gVmZvEE.gif')
+        f.write(response.content)
+
+    with open("knight.gif", 'rb') as gif:
+        file = discord.File(gif)
+        embed.set_image(url="attachment://knight.gif")
+
+    embed.add_field(name=f"{username}'s Stats", value="", inline=False)
+    embed.add_field(name="Level:", value=f"{global_player.lvl}", inline=True)
+    embed.add_field(name="Health:", value=f"{round(global_player.hp, 2)} / {global_player.maxHP}", inline=True)
+    embed.add_field(name="Strength:", value=f"{global_player.str}", inline=True)
+    embed.add_field(name="Dexterity:", value=f"{global_player.dex}", inline=True)
+    embed.add_field(name="Endurance:", value=f"{global_player.end}", inline=True)
+
+    await message.channel.send(embed=embed, file=file)
+
+
+async def help_cmd(message):
     await message.channel.send(
-        f"```{username}'s Stats\nLevel: {global_player.lvl}\nHealth: {global_player.hp}\nStrength: {global_player.str}\nDexterity: {global_player.dex}\nEndurance: {global_player.end}\nCurrent XP: {global_player.xp}```")
+        "```!dungeon - spawn dungeon map to play\n!move - to move within dungeon, call !move and the desired coordinates\nex. !move d3\nNotes - to fight, walk over to an opponent\n!stat - User current status\nFight commands - !fight, !counter, !auto\nFight is a single turn attack, counter is chance to dodge and deal great damage, Auto is to run the fight automatically```")
 
 
 async def fight_enemy(creature, message, client):
     await message.channel.send(f'You have encountered an enemy!')
     while global_player.hp > 0 and creature.character_manager.hp > 0:
-        await message.channel.send(f'Do you want to [!fight / !counter / !auto]')
+        await message.channel.send(f'Do you want to ``!fight  !counter  !auto``')
 
         def check(m):
             return m.author == message.author and m.channel == message.channel and m.content in ['!fight', '!counter',
@@ -223,7 +245,7 @@ async def fight_enemy(creature, message, client):
         elif user_move.content == '!counter':
             chance = random.randint(1, 2)
             if chance == 1:  # 50/50 chance to proc counter
-                p_attack = (global_player.calc_damage_dealt() * 2)  # high risk high reward
+                p_attack = (global_player.calc_damage_dealt() * 2 * global_player.lvl)  # high risk high reward
                 creature.character_manager.modifyHP(p_attack)
 
                 embed = discord.Embed(title="Successful counter!", color=0x00990000)
@@ -237,7 +259,7 @@ async def fight_enemy(creature, message, client):
 
             else:
                 c_attack = (random.randint(1,
-                                           creature.character_manager.str) * 4)  # missed, leaves you wide open for attacks
+                                           creature.character_manager.str) * 2)  # missed, leaves you wide open for attacks
                 p_reduction = global_player.calc_damage_taken(c_attack)
                 global_player.modifyHP(p_reduction)
 
@@ -257,7 +279,15 @@ async def fight_enemy(creature, message, client):
             embed.add_field(name="Enemy Attack:", value="0", inline=True)
             embed.add_field(name="Player Health:", value="0", inline=True)
 
-            msg = await message.channel.send(embed=embed)
+            with open('battle.gif', 'wb') as f:
+                response = requests.get('https://i.imgur.com/cTGkXEE.gif')
+                f.write(response.content)
+
+            with open("battle.gif", 'rb') as gif:
+                file = discord.File(gif)
+                embed.set_image(url="attachment://battle.gif")
+
+            msg = await message.channel.send(embed=embed, file=file)
 
             while global_player.hp > 0 and creature.character_manager.hp > 0:
                 p_attack = global_player.calc_damage_dealt()
@@ -310,6 +340,20 @@ def run_discord_bot(player_obj, dungeon_obj):
     @client.event
     async def on_ready():
         print(f'{client.user} is now running!')
+        channel = client.get_channel(1090076422699233331)
+        embed = discord.Embed(title="DungeonRPG", color=0x00990000)
+        embed.add_field(name="", value="O, Inheritor of the Frenzied Flame. For so long, they have tried to extinguish thy light. This accursed dungeon they so desperately cling to, believing it could tame your fire. Climb the floors and incinerate all who oppose you, for glory and victory will be yours when you set the world that casted you out aflame. You, alone, are the honored one.", inline=True)
+
+        with open('agravain.gif', 'wb') as f:
+            response = requests.get('https://media.tenor.com/AfntJE4H984AAAAd/agravain.gif')
+            f.write(response.content)
+
+        with open("agravain.gif", 'rb') as gif:
+            file = discord.File(gif)
+            embed.set_image(url="attachment://agravain.gif")
+            embed.add_field(name="", value="To begin, type !dungeon or !help for instructions", inline=False)
+
+            await channel.send(embed=embed, file=file)
 
     @client.event
     async def on_message(message):
@@ -328,6 +372,8 @@ def run_discord_bot(player_obj, dungeon_obj):
             await message.channel.send(file=discord.File("output_imgs/working_dungeon.png"))
         elif user_message == '!stat':
             await print_stats(username, message)
+        elif user_message == '!help':
+            await help_cmd(message)
         # check if message begins with "!move"
         elif user_message.startswith('!move'):
             await handle_move(user_message, message, client)
