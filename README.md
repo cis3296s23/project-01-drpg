@@ -39,7 +39,7 @@ pip install pillow
 - !help - get the help message
 - !dungeon - spawn dungeon map to play
 - !move - to move within dungeon, call !move and the desired coordinates (ex. !move d3)
-Notes - to fight, walk over to an opponent
-Fight commands - !fight, !counter, !auto
-Fight is a single turn attack, counter is chance to dodge and deal great damage, Auto is to run the fight automatically
-Get to the door to beat the level and level up!
+- Notes - to fight, walk over to an opponent
+- Fight commands - !fight, !counter, !auto
+- Fight is a single turn attack, counter is chance to dodge and deal great damage, Auto is to run the fight automatically
+- Get to the door to beat the level and level up!
