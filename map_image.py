@@ -7,16 +7,20 @@ def generate_img(dungeon_obj, output_loc):
     for i in range(len(dungeon_obj)):
         dungeon.append([])
         for j in range(len(dungeon_obj[i])):
-            # convert wall to 0 and floor to 1
-            if dungeon_obj[i][j] != dungeon_generator.Cells().empty:
+            # convert floor to 0 and emoty to 1
+            if dungeon_obj[i][j] == dungeon_generator.Cells().floor or dungeon_obj[i][j] == dungeon_generator.Cells().player:
                 dungeon[i].append(0)
+            elif dungeon_obj[i][j] == dungeon_generator.Cells().door:
+                dungeon[i].append(2)
             else:
                 dungeon[i].append(1)
+            
     print("done converting dungeon to 0s and 1s")    
 
     # load the wall and floor textures
     wall_texture = Image.open("dungeon_imgs/Wall.jpg")
     floor_texture = Image.open("dungeon_imgs/Floor.jpg")
+    door_texture = Image.open("dungeon_imgs/Door.jpg")
 
     # set the size of each tile and grid cell in pixels
     tile_size = 20
@@ -32,8 +36,10 @@ def generate_img(dungeon_obj, output_loc):
         for x in range(len(dungeon[0])):
             if dungeon[y][x] == 1:
                 texture = wall_texture
-            else:
+            elif dungeon[y][x] == 0:
                 texture = floor_texture
+            elif dungeon[y][x] == 2:
+                texture = door_texture
             x1 = x * (tile_size + grid_size) + grid_size
             y1 = y * (tile_size + grid_size) + grid_size
             x2 = x1 + tile_size

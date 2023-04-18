@@ -6,22 +6,34 @@ import creatures_generator
 import dungeon_generator
 import map_image
 
+def make_new_floor():
+    global global_player
+    global global_dungeon
+    global_dungeon = dungeon_generator.DungeonObj(6, 5, 16)
+    map_image.generate_img(global_dungeon.ascii, "output_imgs/base_dungeon.png")
+    
+    global_dungeon.place_creatures(5, global_player.lvl)
+
+    regenerate_dungeon()
+    
+
 def regenerate_dungeon():
-    dungeon_obj = global_dungeon
+    global global_player
+    global global_dungeon
     image = Image.open("output_imgs/base_dungeon.png")
     image.save("output_imgs/working_dungeon.png")
     
-    for i in range(len(dungeon_obj.ascii)):
-        for j in range(len(dungeon_obj.ascii[i])):
+    for i in range(len(global_dungeon.ascii)):
+        for j in range(len(global_dungeon.ascii[i])):
             # check if there is a creature at this position by checking the class of the object
-            if isinstance(dungeon_obj.ascii[i][j], creatures_generator.Creature):
-                if dungeon_obj.ascii[i][j].name == "goblin":
+            if isinstance(global_dungeon.ascii[i][j], creatures_generator.Creature):
+                if global_dungeon.ascii[i][j].name == "goblin":
                     token_img = "dungeon_imgs/Goblin.jpg"
-                elif dungeon_obj.ascii[i][j].name == "troll":
+                elif global_dungeon.ascii[i][j].name == "troll":
                     token_img = "dungeon_imgs/Troll.jpg"
-                elif dungeon_obj.ascii[i][j].name == "dragon":
+                elif global_dungeon.ascii[i][j].name == "dragon":
                     token_img = "dungeon_imgs/Dragon.jpg"
-                elif dungeon_obj.ascii[i][j].name == "skeleton":
+                elif global_dungeon.ascii[i][j].name == "skeleton":
                     token_img = "dungeon_imgs/Skeleton.jpg"
                     
                 map_image.place_token(
@@ -29,7 +41,7 @@ def regenerate_dungeon():
                     token_img,
                     (i, j),
                     "output_imgs/working_dungeon.png")
-            elif dungeon_obj.ascii[i][j] == dungeon_generator.Cells().player:
+            elif global_dungeon.ascii[i][j] == dungeon_generator.Cells().player:
                 map_image.place_token(
                     "output_imgs/working_dungeon.png", 
                     "dungeon_imgs/Player.png",
@@ -43,6 +55,17 @@ async def handle_move(user_message, message, client):
     # convert this into ij coordinates
     y = ord(move[0]) - 97
     x = int(move[1:]) -1
+    # check displacement from current position
+    for i in range(len(global_dungeon.ascii)):
+        for j in range(len(global_dungeon.ascii[i])):
+            if global_dungeon.ascii[i][j] == dungeon_generator.Cells().player:
+                x_displacement = abs(j - x)
+                y_displacement = abs(i - y)
+                # get hypotenuse
+                hypotenuse = (x_displacement ** 2 + y_displacement ** 2) ** 0.5
+                if hypotenuse > global_player.dex:
+                    await message.channel.send(f'You are too slow to move there, you only have {global_player.dex} dexterity.')
+                    return
     # check if the move is valid
     if x < 0 or x > 16 or y < 0 or y > 16:
         await message.channel.send("Invalid move, please try again.")
@@ -77,19 +100,35 @@ async def handle_move(user_message, message, client):
         else:
             await message.channel.send(f'Player has been slain by {enemy_obj.name}')
             global_dungeon.reset_map()
+    if global_dungeon.ascii[y][x] == dungeon_generator.Cells().door:
+        await message.channel.send("You have reached the next level!")
+        await level_up(message, client)
+        make_new_floor()
+        await message.channel.send(file=discord.File("output_imgs/working_dungeon.png"))
+        return
 
+async def level_up(message, client):
+    global_player.lvl += 1
+    # ask the player what they want to level up
+    msg = await message.channel.send("What would you like to level up?")
+    # react with three emojis
+    for emoji in [ '💪', '🏃', '🔰']:
+            await msg.add_reaction(emoji)
+    def check(reaction, user):
+        return (user != client.user and
+                reaction.message.id == msg.id)
+
+    reaction, user = await client.wait_for('reaction_add', check=check)
+    # return responses.handle_movement(reaction, global_dungeon)
+    emoji_r = reaction.emoji
+    if emoji_r == '💪':
+        global_player.str += 1
+    elif emoji_r == '🏃':
+        global_player.dex += 1
+    elif emoji_r == '🔰':
+        global_player.end += 1
     
-
-
-async def standard_dungeon(message, client):
-    # This is the standard dungeon loop
-    while True:
-        new_map = str(global_dungeon)
-        sent_message = await message.channel.send(new_map)
-        for emoji in ['\U00002B06', '\U00002B07', '\U00002B05', '\U000027A1']:
-            await sent_message.add_reaction(emoji)
-        await check_reaction(client, sent_message, message)
-        new_map = None
+    await message.channel.send(f'Player has leveled up to level {global_player.lvl}!')
 
 async def check_reaction(client, sent_message, message):
     # please note that this only handles the first reaction

@@ -111,6 +111,15 @@ class DungeonObj:
             self.get_start_pos()
             self.ascii[self.player_start[0]][self.player_start[1]] = self.cells.player
 
+        # place single door (this shouldnt be here)
+        valid = False
+        while not valid:
+            x = random.randint(0, len(self.ascii)-1)
+            y = random.randint(0, len(self.ascii[0])-1)
+            if self.ascii[x][y] == self.cells.floor:
+                self.ascii[x][y] = self.cells.door
+                valid = True
+
 
     def __str__(self):
         string = ""
