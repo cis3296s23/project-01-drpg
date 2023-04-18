@@ -13,6 +13,7 @@ create a file called TOKEN.txt in the directory and place the API token there.
 ```
 pip install discord.py
 pip install pillow
+pip install requests
 ```
 -  Run main.py, and the discord bot should run in the server
 
