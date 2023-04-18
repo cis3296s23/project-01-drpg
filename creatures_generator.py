@@ -15,6 +15,7 @@ class Creature:
               end=creatures['end'] * lvl,
               dex=creatures['dex'] * lvl,
               hp=creatures['hp'] * lvl,
+              maxHP=creatures['maxHP'] * lvl,
               xp=0,
               lvl=lvl
             )

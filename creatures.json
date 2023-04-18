@@ -6,6 +6,7 @@
       "end": 5,
       "dex": 5,
       "hp": 7,
+      "maxHP": 7,
       "symbol": "G"
     },
     {
@@ -14,6 +15,7 @@
       "end": 3,
       "dex": 3,
       "hp": 4,
+      "maxHP": 4,
       "symbol": "S"
     },
     {
@@ -22,6 +24,7 @@
       "end": 7,
       "dex": 3,
       "hp": 10,
+      "maxHP": 10,
       "symbol": "Z"
     },
     {
@@ -30,6 +33,7 @@
       "end": 10,
       "dex": 5,
       "hp": 15,
+      "maxHP": 15,
       "symbol": "D"
     }
   ]
