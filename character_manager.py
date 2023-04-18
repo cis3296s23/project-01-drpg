@@ -1,11 +1,12 @@
 # import gear_generation
 
 class CharacterManager:
-    def __init__(self, str, end, dex, hp, xp, lvl, weapon=None, armor=None):
+    def __init__(self, str, end, dex, hp, maxHP, xp, lvl, weapon=None, armor=None):
         self.str = str
         self.end = end
         self.dex = dex
         self.hp = hp
+        self.maxHP = maxHP
         self.xp = xp
         self.lvl = lvl
         self.weapon = weapon

@@ -6,7 +6,7 @@ import creatures_generator
 from PIL import Image
 
 if __name__ == '__main__':
-    player_obj = character_manager.CharacterManager(5, 5, 5, 100, 0, 1, None, None)
+    player_obj = character_manager.CharacterManager(5, 5, 5, 100, 100, 0, 1, None, None)
     dungeon_obj = dungeon_generator.DungeonObj(6, 5, 16)
     map_image.generate_img(dungeon_obj.ascii, "output_imgs/base_dungeon.png")
     image = Image.open("output_imgs/base_dungeon.png")

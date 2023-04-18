@@ -159,18 +159,24 @@ async def fight_enemy(creature, message, client):
             p_attack = global_player.calc_damage_dealt()
             creature.character_manager.modifyHP(p_attack)
 
-            await message.channel.send(f'Player Attack: {p_attack}\n'
-                                       f'Enemy Health: {creature.character_manager.hp}')
+            embed = discord.Embed(title="Player Turn!", color=0x00990000)
+            embed.add_field(name="Player Attack:", value=f"{p_attack}", inline=True)
+            embed.add_field(name="Enemy Health:", value=f"{creature.character_manager.hp} / {creature.character_manager.maxHP}", inline=True)
+
+            await message.channel.send(embed=embed)
 
             if creature.character_manager.hp <= 0:  # return true when the player beats the enemy
                 return True
 
             c_attack = random.randint(1, creature.character_manager.str)
-            p_reduction = round(global_player.calc_damage_taken(c_attack), 2)
+            p_reduction = global_player.calc_damage_taken(c_attack)
             global_player.modifyHP(p_reduction)
 
-            await message.channel.send(f'Enemy Attack: {c_attack}\n'
-                                       f'Player Health: {global_player.hp}')
+            embed = discord.Embed(title="Enemy Turn!", color=0x00990099)
+            embed.add_field(name="Enemy Attack:", value=f"{round(p_reduction,2)}", inline=True)
+            embed.add_field(name="Player Health:", value=f"{round(global_player.hp,2)} / {global_player.maxHP}", inline=True)
+
+            await message.channel.send(embed=embed)
 
             if global_player.hp <= 0:  # return false when the creature beats the player
                 return False
@@ -181,9 +187,11 @@ async def fight_enemy(creature, message, client):
                 p_attack = (global_player.calc_damage_dealt() * 2)  # high risk high reward
                 creature.character_manager.modifyHP(p_attack)
 
-                await message.channel.send(f'Successful Counter!\n'
-                                           f'Player Attack: {p_attack}\n'
-                                           f'Enemy Health: {creature.character_manager.hp}')
+                embed = discord.Embed(title="Successful counter!", color=0x00990000)
+                embed.add_field(name="Player Attack:", value=f"{p_attack}", inline=True)
+                embed.add_field(name="Enemy Health:", value=f"{creature.character_manager.hp} / {creature.character_manager.maxHP}", inline=True)
+
+                await message.channel.send(embed=embed)
 
                 if creature.character_manager.hp <= 0:  # return true when the player beats the enemy
                     return True
@@ -191,29 +199,58 @@ async def fight_enemy(creature, message, client):
             else:
                 c_attack = (random.randint(1,
                                            creature.character_manager.str) * 4)  # missed, leaves you wide open for attacks
-                p_reduction = round(global_player.calc_damage_taken(c_attack), 2)
+                p_reduction = global_player.calc_damage_taken(c_attack)
                 global_player.modifyHP(p_reduction)
 
-                await message.channel.send(f'Unsuccessful Counter!\n'
-                                           f'Enemy Attack: {p_reduction}\n'
-                                           f'Player Health: {global_player.hp}')
+                embed = discord.Embed(title="Unsuccessful Counter!", color=0x00990099)
+                embed.add_field(name="Enemy Attack:", value=f"{round(p_reduction,2)}", inline=True)
+                embed.add_field(name="Player Health:", value=f"{round(global_player.hp,2)} / {global_player.maxHP}", inline=True)
+
+                await message.channel.send(embed=embed)
 
                 if global_player.hp <= 0:  # return false when the creature beats the player
                     return False
 
         elif user_move.content == '!auto':
+            embed = discord.Embed(title="In Battle!", color=0x00990000)
+            embed.add_field(name="Player Attack:", value="0", inline=True)
+            embed.add_field(name="Enemy Health:", value="0", inline=True)
+            embed.add_field(name="Enemy Attack:", value="0", inline=True)
+            embed.add_field(name="Player Health:", value="0", inline=True)
+
+            msg = await message.channel.send(embed=embed)
+
             while global_player.hp > 0 and creature.character_manager.hp > 0:
                 p_attack = global_player.calc_damage_dealt()
                 creature.character_manager.modifyHP(p_attack)
 
+                embed.set_field_at(index=0, name="Player Attack:", value=f"{p_attack}")
+                embed.set_field_at(index=1, name="Enemy Health:", value=f"{creature.character_manager.hp} / {creature.character_manager.maxHP}")
+
+                await msg.edit(embed=embed)
+
                 if creature.character_manager.hp <= 0:
+                    embed.set_field_at(index=3, name="Player Health:",
+                                       value=f"{round(global_player.hp, 2)} / {global_player.maxHP}")
+                    embed.set_field_at(index=2, name="Enemy Attack:", value="0")
+                    await msg.edit(embed=embed)
                     return True
 
                 c_attack = random.randint(1, creature.character_manager.str)
-                p_reduction = round(global_player.calc_damage_taken(c_attack), 2)
+                p_reduction = global_player.calc_damage_taken(c_attack)
                 global_player.modifyHP(p_reduction)
 
+                embed.set_field_at(index=2, name="Enemy Attack:", value=f"{round(p_reduction, 2)}")
+                embed.set_field_at(index=3, name="Player Health:",
+                                   value=f"{round(global_player.hp, 2)} / {global_player.maxHP}")
+
+                await msg.edit(embed=embed)
+
                 if global_player.hp <= 0:
+                    embed.set_field_at(index=1, name="Enemy Health:",
+                                       value=f"{creature.character_manager.hp} / {creature.character_manager.maxHP}")
+                    embed.set_field_at(index=0, name="Player Attack:", value="0")
+                    await msg.edit(embed=embed)
                     return False
 
         else:
