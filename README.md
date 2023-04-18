@@ -35,4 +35,11 @@ pip install pillow
 7. Bot owners must have 2FA enabled for certain actions and permissions when added in servers that have Server-Wide 2FA enabled
 8. Now the resulting URL can be used to add your bot to a server. Copy and paste the URL into your browser, choose a server to invite the bot to(will only allow the bot to be invited to servers where you have the "Manage Server" permissions). Then click "Authorize".
 
-
+## How To Play
+- !help - get the help message
+- !dungeon - spawn dungeon map to play
+- !move - to move within dungeon, call !move and the desired coordinates (ex. !move d3)
+Notes - to fight, walk over to an opponent
+Fight commands - !fight, !counter, !auto
+Fight is a single turn attack, counter is chance to dodge and deal great damage, Auto is to run the fight automatically
+Get to the door to beat the level and level up!
