@@ -199,6 +199,28 @@ async def print_stats(username, message):
 
     await message.channel.send(embed=embed, file=file)
 
+async def print_enemy_stats(creature, message):
+    token_img = "none"
+    if creature.name == "goblin":
+        token_img = "https://media.discordapp.net/attachments/1090076585824092161/1092834482735829102/3221947_orig.png"
+    elif creature.name == "troll":
+        token_img = "https://discord.com/channels/1090070217973051435/1090076585824092161"
+    elif creature.name == "dragon":
+        token_img = "https://cdn.discordapp.com/attachments/1090076585824092161/1092834483281076274/Basilisk.png"
+    elif creature.name == "skeleton":
+        token_img = "https://media.discordapp.net/attachments/1090076585824092161/1092834482995855471/DeanSpencer-filler-skeletonknight.png?width=271&height=400"
+
+    embed = discord.Embed(title="Adversary", color=0x00990099)
+
+    embed.add_field(name=f"{creature.name}'s Stats", value="", inline=False)
+    embed.add_field(name="Level:", value=f"{creature.character_manager.lvl}", inline=True)
+    embed.add_field(name="Health:", value=f"{creature.character_manager.hp}", inline=True)
+    embed.add_field(name="Strength:", value=f"{creature.character_manager.str}", inline=True)
+    embed.add_field(name="Dexterity:", value=f"{creature.character_manager.dex}", inline=True)
+    embed.add_field(name="Endurance:", value=f"{creature.character_manager.end}", inline=True)
+    embed.set_image(url=token_img)
+
+    await message.channel.send(embed=embed)
 
 async def help_cmd(message):
     await message.channel.send(
@@ -207,6 +229,7 @@ async def help_cmd(message):
 
 async def fight_enemy(creature, message, client):
     await message.channel.send(f'You have encountered an enemy!')
+    await print_enemy_stats(creature, message)
     while global_player.hp > 0 and creature.character_manager.hp > 0:
         await message.channel.send(f'Do you want to ``!fight  !counter  !auto``')
 
