@@ -240,9 +240,9 @@ async def print_stats(username, message):
     embed.add_field(name=f"{username}'s Stats", value="", inline=False)
     embed.add_field(name="Level:", value=f"{global_player.lvl}", inline=True)
     embed.add_field(name="Health:", value=f"{round(global_player.hp, 2)} / {global_player.maxHP}", inline=True)
-    embed.add_field(name="Strength:", value=f"{global_player.str}", inline=True)
-    embed.add_field(name="Dexterity:", value=f"{global_player.dex}", inline=True)
-    embed.add_field(name="Endurance:", value=f"{global_player.end}", inline=True)
+    embed.add_field(name="Strength:", value=f"{round(global_player.str,2)}", inline=True)
+    embed.add_field(name="Dexterity:", value=f"{round(global_player.dex,2)}", inline=True)
+    embed.add_field(name="Endurance:", value=f"{round(global_player.end,2)}", inline=True)
 
     await message.channel.send(embed=embed, file=file)
 
@@ -293,8 +293,8 @@ async def fight_enemy(creature, message, client):
             creature.character_manager.modifyHP(p_attack)
 
             embed = discord.Embed(title="Player Turn!", color=0x00990000)
-            embed.add_field(name="Player Attack:", value=f"{p_attack}", inline=True)
-            embed.add_field(name="Enemy Health:", value=f"{creature.character_manager.hp} / {creature.character_manager.maxHP}", inline=True)
+            embed.add_field(name="Player Attack:", value=f"{round(p_attack,2)}", inline=True)
+            embed.add_field(name="Enemy Health:", value=f"{round(creature.character_manager.hp,2)} / {creature.character_manager.maxHP}", inline=True)
 
             await message.channel.send(embed=embed)
 
@@ -321,8 +321,8 @@ async def fight_enemy(creature, message, client):
                 creature.character_manager.modifyHP(p_attack)
 
                 embed = discord.Embed(title="Successful counter!", color=0x00990000)
-                embed.add_field(name="Player Attack:", value=f"{p_attack}", inline=True)
-                embed.add_field(name="Enemy Health:", value=f"{creature.character_manager.hp} / {creature.character_manager.maxHP}", inline=True)
+                embed.add_field(name="Player Attack:", value=f"{round(p_attack,2)}", inline=True)
+                embed.add_field(name="Enemy Health:", value=f"{round(creature.character_manager.hp,2)} / {creature.character_manager.maxHP}", inline=True)
 
                 await message.channel.send(embed=embed)
 
@@ -365,8 +365,8 @@ async def fight_enemy(creature, message, client):
                 p_attack = global_player.calc_damage_dealt()
                 creature.character_manager.modifyHP(p_attack)
 
-                embed.set_field_at(index=0, name="Player Attack:", value=f"{p_attack}")
-                embed.set_field_at(index=1, name="Enemy Health:", value=f"{creature.character_manager.hp} / {creature.character_manager.maxHP}")
+                embed.set_field_at(index=0, name="Player Attack:", value=f"{round(p_attack, 2)}")
+                embed.set_field_at(index=1, name="Enemy Health:", value=f"{round(creature.character_manager.hp, 2)} / {creature.character_manager.maxHP}")
 
                 await msg.edit(embed=embed)
 
@@ -389,7 +389,7 @@ async def fight_enemy(creature, message, client):
 
                 if global_player.hp <= 0:
                     embed.set_field_at(index=1, name="Enemy Health:",
-                                       value=f"{creature.character_manager.hp} / {creature.character_manager.maxHP}")
+                                       value=f"{round(creature.character_manager.hp, 2)} / {creature.character_manager.maxHP}")
                     embed.set_field_at(index=0, name="Player Attack:", value="0")
                     await msg.edit(embed=embed)
                     return False
