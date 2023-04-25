@@ -30,8 +30,24 @@ class CharacterManager:
             self.hp -= amount  # reduce hp based on calc_damage_taken
 
     def check_lvl_up(self):
-        # to be decided
-        return True
+        if self.xp >= (self.level * 10):   # xp system, increases based on players level
+            self.level += 1
+            self.xp -= (self.level * 10)
+            choice = input("Level up! Please choose a stat to increase: ")
+            match choice:   # for every level up, the user gets to choose which stat to increase
+                case "str":
+                    self.str += 1
+                case "end":
+                    self.end += 1
+                case "dex":
+                    self.dex += 1
+                case "hp":
+                    self.hp += 1
+                case _:   # user will be prompted if none of the valid choice are typed
+                    print("Invalid stat, please try again")
+            return True   # return true if user levels up else return false
+        else:
+            return False
 
     def give_xp(self, amount):  # attain xp
         self.xp += amount
