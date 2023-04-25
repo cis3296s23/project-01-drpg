@@ -1,11 +1,13 @@
 from character_manager import CharacterManager
 import json
 import random
-
+import os
 class Creature:
 
     def __init__(self, lvl, demon=False):
-        with open('creatures.json', 'r') as f:
+        project_root = os.path.dirname(os.path.abspath(__file__))
+        creature_file_path = os.path.join(project_root, 'creatures.json')
+        with open(creature_file_path) as f:
             lvl += 2
             data = json.load(f)
             if not demon:
