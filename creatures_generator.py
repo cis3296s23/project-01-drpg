@@ -17,7 +17,8 @@ class Creature:
               hp=creatures['hp'] * lvl,
               maxHP=creatures['maxHP'] * lvl,
               xp=0,
-              lvl=lvl
+              lvl=lvl,
+            souls = 0
             )
     
     def __str__(self) -> str:

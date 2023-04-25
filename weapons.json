@@ -1,28 +1,37 @@
 {
-    "weapons": {
-        "dagger": {
-            "damage": 1,
-		"speed": 10
+    "weapons": [
+        {
+            "name": "Sword",
+            "damage": 5,
+            "speed": 5
         },
-        "sword": {
-           	"damage": 4,
-		"speed": 7
+        {
+            "name": "Axe",
+            "damage": 6,
+            "speed": 4
         },
-        "halberd": {
-            "damage": 7,
-		"speed": 4
+        {
+            "name": "Mace",
+            "damage": 8,
+            "speed": 3
         },
-        "zweihander": {
-            "damage": 10,
-		"speed": 1
+        {
+            "name": "Zweihander",
+          "damage": 10,
+          "speed": 3
         },
-	    "grenade": {
-	    "damage": 10,
-	        "speed":10
-    	},
-	"crossbow" : {
-	    "damage": 6,
-		"speed":4
-	}
-    }
+        {
+          "name": "Halberd",
+          "damage": 9,
+          "speed": 3
+        }
+    ]
 }
+
+
+
+
+
+
+
+
