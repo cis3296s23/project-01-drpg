@@ -71,19 +71,23 @@ def generate_img(dungeon_obj, output_loc):
     image.save(output_loc)
 
 
-def place_token(original_image, token_image, token_pos, modified_image):
+def place_token(original_image, token_image, token_pos, modified_image, cell_size = 1):
     # load the image and the goblin token image
     image = Image.open(original_image).convert("RGBA")
     goblin = Image.open(token_image).convert("RGBA")   
 
     # set the size and position of the token and the ellipse
     goblin_size = 50
-    goblin_pos = ((token_pos[1]*21+1), (token_pos[0]*21+1))  # convert (row, col) to (x, y)
-    ellipse_size = (20, 20)  # new size for the ellipse
-    ellipse_pos = (goblin_pos[0] + goblin_size//2, goblin_pos[1] + goblin_size//2)
+    if cell_size != 1:
+        goblin_pos = ((token_pos[1]*21+1-(20*(cell_size-2))), (token_pos[0]*21+1-(20*(cell_size-2))))  # convert (row, col) to (x, y)
+    else:
+        goblin_pos = ((token_pos[1]*21+1), (token_pos[0]*21+1))  # convert (row, col) to (x, y)
+        
+    ellipse_size = (20*cell_size, 20*cell_size)  # new size for the ellipse
+    # ellipse_pos = (goblin_pos[0] + goblin_size//2, goblin_pos[1] + goblin_size//2)
 
-    print(f"Token image size: {goblin.size}")
-    print(f"Ellipse size: {ellipse_size}")
+    # print(f"Token image size: {goblin.size}")
+    # print(f"Ellipse size: {ellipse_size}")
 
     # resize the token image to match the size of the ellipse
     token = goblin.resize(ellipse_size)

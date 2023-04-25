@@ -6,6 +6,24 @@ import creatures_generator
 import dungeon_generator
 import map_image
 import requests
+import boss_generator
+
+def enter_boss_dungeon():
+    global global_player
+    global global_dungeon
+    global_dungeon = boss_generator.boss_process(16, global_player.lvl)
+    # image = Image.open("output_imgs/base_boss_room.png")
+    # image.save("output_imgs/working_dungeon.png")
+    
+    for i in range(len(global_dungeon.ascii)):
+        for j in range(len(global_dungeon.ascii[i])):
+            if global_dungeon.ascii[i][j] == dungeon_generator.Cells().player:
+                map_image.place_token(
+                    "output_imgs/working_dungeon.png", 
+                    "dungeon_imgs/Player.png",
+                    (i, j),
+                    "output_imgs/working_dungeon.png")
+
 
 def make_new_floor():
     global global_player
@@ -36,12 +54,23 @@ def regenerate_dungeon():
                     token_img = "dungeon_imgs/Dragon.jpg"
                 elif global_dungeon.ascii[i][j].name == "skeleton":
                     token_img = "dungeon_imgs/Skeleton.jpg"
+                elif global_dungeon.ascii[i][j].name == "demon":
+                    token_img = "dungeon_imgs/demon1.jpg"
+                
+                if token_img != "dungeon_imgs/demon1.jpg":
+                    map_image.place_token(
+                        "output_imgs/working_dungeon.png", 
+                        token_img,
+                        (i, j),
+                        "output_imgs/working_dungeon.png")
+                else:
+                    map_image.place_token(
+                        "output_imgs/working_dungeon.png", 
+                        token_img,
+                        (i, j),
+                        "output_imgs/working_dungeon.png",
+                        cell_size=3)
                     
-                map_image.place_token(
-                    "output_imgs/working_dungeon.png", 
-                    token_img,
-                    (i, j),
-                    "output_imgs/working_dungeon.png")
             elif global_dungeon.ascii[i][j] == dungeon_generator.Cells().player:
                 map_image.place_token(
                     "output_imgs/working_dungeon.png", 
@@ -89,22 +118,34 @@ async def handle_move(user_message, message, client):
         enemy_obj = global_dungeon.ascii[y][x]
         result = await fight_enemy(enemy_obj, message, client)
         if result:
-            await message.channel.send(f'Player has slain {enemy_obj.name}')
-            global_dungeon.remove_creature(enemy_obj)
-            for i in range(len(global_dungeon.ascii)):
-                for j in range(len(global_dungeon.ascii[i])):
-                    if global_dungeon.ascii[i][j] == dungeon_generator.Cells().player:
-                        global_dungeon.ascii[i][j] = dungeon_generator.Cells().floor
-            global_dungeon.ascii[y][x] = dungeon_generator.Cells().player
-            regenerate_dungeon()
+            if enemy_obj.name != "demon":
+                await message.channel.send(f'Player has slain {enemy_obj.name}')
+                global_dungeon.remove_creature(enemy_obj)
+                for i in range(len(global_dungeon.ascii)):
+                    for j in range(len(global_dungeon.ascii[i])):
+                        if global_dungeon.ascii[i][j] == dungeon_generator.Cells().player:
+                            global_dungeon.ascii[i][j] = dungeon_generator.Cells().floor
+                global_dungeon.ascii[y][x] = dungeon_generator.Cells().player
+                regenerate_dungeon()
+            else:
+                # place door in ascii
+                global_dungeon.ascii[y][x] = dungeon_generator.Cells().door
+                regenerate_dungeon()
+                global_player.hp = 100
+            global_player.xp += enemy_obj.character_manager.lvl
+
             await message.channel.send(file=discord.File("output_imgs/working_dungeon.png"))
         else:
             await message.channel.send(f'Player has been slain by {enemy_obj.name}')
-            global_dungeon.reset_map()
+            # global_dungeon.reset_map()
     if global_dungeon.ascii[y][x] == dungeon_generator.Cells().door:
         await message.channel.send("You have reached the next level!")
         await level_up(message, client)
-        make_new_floor()
+        if global_player.lvl > 0 and global_player.lvl%3 == 0:
+            print(global_player.lvl)
+            enter_boss_dungeon()
+        else:
+            make_new_floor()
         await message.channel.send(file=discord.File("output_imgs/working_dungeon.png"))
         return
 
@@ -124,12 +165,18 @@ async def level_up(message, client):
     emoji_r = reaction.emoji
     if emoji_r == '💪':
         global_player.str += 1
+        global_player.str *= (1 + global_player.xp/10)
     elif emoji_r == '🏃':
         global_player.dex += 1
+        global_player.dex *= (1 + global_player.xp/10)
+
     elif emoji_r == '🔰':
         global_player.end += 1
+        global_player.end *= (1 + global_player.xp/10)
+    global_player.xp = 0
     
     await message.channel.send(f'Player has leveled up to level {global_player.lvl}!')
+    
 
 async def check_reaction(client, sent_message, message):
     # please note that this only handles the first reaction
@@ -209,6 +256,8 @@ async def print_enemy_stats(creature, message):
         token_img = "https://media.discordapp.net/attachments/1090076585824092161/1100204082343456828/Dragon.jpg?width=395&height=395"
     elif creature.name == "skeleton":
         token_img = "https://media.discordapp.net/attachments/1090076585824092161/1100204082783862924/Skeleton.jpg?width=395&height=395"
+    elif creature.name == "demon":
+        token_img = "https://cdn.discordapp.com/attachments/1090076585824092161/1100212512680587395/demon1.jpg"
 
     embed = discord.Embed(title="Adversary", color=0x00990099)
 

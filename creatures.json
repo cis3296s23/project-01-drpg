@@ -35,6 +35,15 @@
       "hp": 15,
       "maxHP": 15,
       "symbol": "D"
+    },
+    {
+      "name": "demon",
+      "str": 15,
+      "end": 20,
+      "dex": 20,
+      "hp": 10,
+      "maxHP": 10,
+      "symbol": "d"
     }
   ]
 }
