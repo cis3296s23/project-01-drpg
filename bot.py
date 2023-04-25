@@ -411,7 +411,7 @@ async def fight_enemy(creature, message, client):
         elif user_move.content == '!counter':
             chance = random.randint(1, 2)
             if chance == 1:  # 50/50 chance to proc counter
-                p_attack = (global_player.calc_damage_dealt() * 2 * global_player.lvl)  # high risk high reward
+                p_attack = (global_player.calc_damage_dealt() * global_player.lvl)  # high risk high reward
                 creature.character_manager.modifyHP(p_attack)
 
                 embed = discord.Embed(title="Successful counter!", color=0x00990000)
