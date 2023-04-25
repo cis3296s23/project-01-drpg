@@ -1,6 +1,7 @@
 from PIL import Image, ImageDraw, ImageFont
 import dungeon_generator
 
+
 def generate_img(dungeon_obj, output_loc):
     # your 2D array of dungeon tiles
     dungeon = []
