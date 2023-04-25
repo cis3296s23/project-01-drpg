@@ -3,7 +3,9 @@ import unittest
 from gear_generation import Armor, Weapon
 from character_manager import CharacterManager
 from creatures_generator import Creature
+
 import dungeon_generator
+
 
 
 class TestArmor(unittest.TestCase):
@@ -58,6 +60,8 @@ class TestDungeonGen(unittest.TestCase):
         # result should be in two groups: (1,2,4) and (3, 5)
         for j in e:
             print(str(j))
+
+
 
 def suite():
     suite = unittest.TestSuite()
