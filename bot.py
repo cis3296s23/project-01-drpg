@@ -139,6 +139,7 @@ async def handle_move(user_message, message, client):
             await message.channel.send(file=discord.File("output_imgs/working_dungeon.png"))
         else:
             await message.channel.send(f'Player has been slain by {enemy_obj.name}')
+            await death_screen(message)
             # global_dungeon.reset_map()
     if global_dungeon.ascii[y][x] == dungeon_generator.Cells().door:
         await message.channel.send("You have reached the next level!")
@@ -221,12 +222,25 @@ async def check_reaction(client, sent_message, message):
                 movement(emoji_r)
             else:
                 await message.channel.send(f'Player has been slain by {enemy_obj.name}')
+                await death_screen(message)
                 global_dungeon.reset_map()
 
         # return global_dungeon.get_current_map()
     except Exception as e:
         print(e)
 
+async def death_screen(message):
+    embed = discord.Embed(title="Flames extinguished", color=0x00000000)
+
+    with open('death.gif', 'wb') as f:
+        response = requests.get('https://media.giphy.com/media/TbONGqAdpTWQW3Hz5V/giphy.gif')
+        f.write(response.content)
+
+    with open("death.gif", 'rb') as gif:
+        file = discord.File(gif)
+        embed.set_image(url="attachment://death.gif")
+
+    await message.channel.send(embed=embed, file=file)
 
 async def print_stats(username, message):
     embed = discord.Embed(title="The Bearer of Fire", color=0x00990000)
@@ -283,7 +297,7 @@ async def fight_enemy(creature, message, client):
     await message.channel.send(f'You have encountered an enemy!')
     await print_enemy_stats(creature, message)
     while global_player.hp > 0 and creature.character_manager.hp > 0:
-        if global_player.souls >= maxNum:
+        if global_player.souls >= 10 * global_player.lvl:
             await message.channel.send(
                 f'The Embers of your soul are burning viciously!\n Choose your special move! ``!armory  !final attack  !life steal``')
 
@@ -295,22 +309,22 @@ async def fight_enemy(creature, message, client):
             user_move = await client.wait_for('message', check=check)
 
             if user_move.content == '!life steal':
-                p_attack = (global_player.calc_damage_dealt() * 4 * global_player.lvl)
+                p_attack = global_player.calc_damage_dealt()
                 creature.character_manager.modifyHP(p_attack)
                 global_player.increaseHP(p_attack)
 
                 embed = discord.Embed(title="Life Steal", color=0x00990000)
                 embed.add_field(name="", value="All souls you have collected, indiscriminate, become yours..")
-                embed.add_field(name="Player Attack:", value=f"{p_attack}", inline=True)
+                embed.add_field(name="Player Attack:", value=f"{round(p_attack, 2)}", inline=True)
                 embed.add_field(name="Player Health:", value=f"{round(global_player.hp, 2)} / {global_player.maxHP}",
                                 inline=True)
                 embed.add_field(name="Enemy Health:",
-                                value=f"{creature.character_manager.hp} / {creature.character_manager.maxHP}",
+                                value=f"{round(creature.character_manager.hp, 2)} / {creature.character_manager.maxHP}",
                                 inline=True)
                 embed.set_image(
                     url="https://static.wikia.nocookie.net/bleach/images/e/e2/ZankanoTachiMinami.png/revision/latest?cb=20160923173429&path-prefix=fr")
 
-                global_player.souls -= maxNum
+                global_player.souls -= 10 * global_player.lvl
 
                 await message.channel.send(embed=embed)
 
@@ -333,26 +347,25 @@ async def fight_enemy(creature, message, client):
                 embed.add_field(name="Armor Protection:", value=f"{armor.protection}", inline=True)
                 embed.set_image(url="https://i.pinimg.com/originals/37/16/9c/37169c9719cc83821177216cdb19a323.jpg")
 
-                global_player.souls -= maxNum
+                global_player.souls -= 10 * global_player.lvl
 
                 await message.channel.send(embed=embed)
 
             elif user_move.content == '!final attack':
-                attack = random.randint(5, 10)
-                p_attack = (global_player.calc_damage_dealt() * attack * global_player.lvl)
+                p_attack = (global_player.calc_damage_dealt() * global_player.lvl)
                 creature.character_manager.modifyHP(p_attack)
 
                 embed = discord.Embed(title="Longsword of the Remnant Flame", color=0x00990000)
                 embed.add_field(name="",
                                 value="All souls you have collected, indiscriminate, become your sword... \n With a swift swing of your sword, your enemies are no more.")
-                embed.add_field(name="Player Attack:", value=f"{p_attack}", inline=True)
+                embed.add_field(name="Player Attack:", value=f"{round(p_attack, 2)}", inline=True)
                 embed.add_field(name="Enemy Health:",
-                                value=f"{creature.character_manager.hp} / {creature.character_manager.maxHP}",
+                                value=f"{round(creature.character_manager.hp, 2)} / {creature.character_manager.maxHP}",
                                 inline=True)
                 embed.set_image(
                     url="https://e1.pxfuel.com/desktop-wallpaper/505/750/desktop-wallpaper-genryusai-shigekuni-yamamoto.jpg")
 
-                global_player.souls -= maxNum
+                global_player.souls -= 10 * global_player.lvl
 
                 await message.channel.send(embed=embed)
 
