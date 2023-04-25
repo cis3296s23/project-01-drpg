@@ -4,10 +4,14 @@ import random
 
 class Creature:
 
-    def __init__(self, lvl):
+    def __init__(self, lvl, demon=False):
         with open('creatures.json', 'r') as f:
             data = json.load(f)
-            creatures = random.choice(data["creatures"])
+            if not demon:
+              creatures = random.choice(data["creatures"][:-1])
+            else:
+              # select demon from creatures.json
+              creatures = data["creatures"][-1]
             self.name = creatures['name']
             self.symbol = creatures['symbol']
             self.character_manager = CharacterManager(
